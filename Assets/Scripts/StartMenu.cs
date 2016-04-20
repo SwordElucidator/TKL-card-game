@@ -12,10 +12,18 @@ public class StartMenu : MonoBehaviour {
 
     public TweenScale logoTweenScale;
 
+    public TweenPosition selectRoleTween;
+
+    public UISprite hero1;
+
+    private bool canShowSelectRole = false; //check whether can show select role screen
+
 	// Use this for initialization
 	void Start () {
         movTexture.loop = false;
         movTexture.Play();
+        //add onFinish to logoTweenScale
+        logoTweenScale.AddOnFinished(this.OnLogoTweenFinished);
 	}
 	
 	// Update is called once per frame
@@ -33,6 +41,13 @@ public class StartMenu : MonoBehaviour {
        if (isDrawMov != movTexture.isPlaying)
         {
             StopMov();
+        }
+
+       if (canShowSelectRole && Input.GetMouseButtonDown(0))
+        {
+            //show seect row page
+            selectRoleTween.PlayForward();
+            canShowSelectRole = false;
         }
 	}
 
@@ -53,5 +68,25 @@ public class StartMenu : MonoBehaviour {
         isDrawMov = false;
         //show main scene
         logoTweenScale.PlayForward();
+    }
+
+    private void OnLogoTweenFinished()
+    {
+        canShowSelectRole = true;
+    }
+
+    public void OnPlayButtonClick()
+    {
+        BlackMask._instance.Show();
+        VSShow._instance.Show(hero1.spriteName, "hero" + Random.Range(1, 10));
+        StartCoroutine(LoadPlayScene());
+    }
+
+    IEnumerator LoadPlayScene()
+    {
+        yield return new WaitForSeconds(3f);
+        //Application.LoadLevel is obsoleted
+        UnityEngine.SceneManagement.SceneManager.LoadScene(1);
+        
     }
 }
