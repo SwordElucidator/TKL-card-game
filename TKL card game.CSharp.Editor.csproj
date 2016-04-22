@@ -90,6 +90,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="TKL card game.CSharp.Plugins.csproj">
+      <Project>{93146328-C7BB-F98D-87CD-45792C2B2A84}</Project>
+      <Name>TKL card game.CSharp.Plugins</Name>
+    </ProjectReference>
     <ProjectReference Include="TKL card game.CSharp.csproj">
       <Project>{95576196-F88A-0657-72D5-39BCFF66C45D}</Project>
       <Name>TKL card game.CSharp</Name>
@@ -224,6 +228,7 @@
     <None Include="Assets\NGUI\Resources\Shaders\Unlit - Transparent Packed 2.shader" />
     <None Include="Assets\NGUI\Resources\Shaders\Unlit - Transparent Packed 3.shader" />
     <None Include="Assets\NGUI\Resources\Shaders\Unlit - Transparent Packed.shader" />
+    <None Include="Assets\Plugins\Pixelplacement\iTween\ReadMe!\ReadMe!.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>

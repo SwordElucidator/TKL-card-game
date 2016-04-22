@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2015
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TKL card game.CSharp.Plugins", "TKL card game.CSharp.Plugins.csproj", "{93146328-C7BB-F98D-87CD-45792C2B2A84}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TKL card game.CSharp", "TKL card game.CSharp.csproj", "{95576196-F88A-0657-72D5-39BCFF66C45D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TKL card game.CSharp.Editor", "TKL card game.CSharp.Editor.csproj", "{441CAA1D-97A9-74B2-1E63-2E087A86AAA2}"
@@ -11,6 +13,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{93146328-C7BB-F98D-87CD-45792C2B2A84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93146328-C7BB-F98D-87CD-45792C2B2A84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93146328-C7BB-F98D-87CD-45792C2B2A84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93146328-C7BB-F98D-87CD-45792C2B2A84}.Release|Any CPU.Build.0 = Release|Any CPU
 		{95576196-F88A-0657-72D5-39BCFF66C45D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{95576196-F88A-0657-72D5-39BCFF66C45D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95576196-F88A-0657-72D5-39BCFF66C45D}.Release|Any CPU.ActiveCfg = Release|Any CPU

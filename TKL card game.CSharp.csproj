@@ -63,6 +63,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="TKL card game.CSharp.Plugins.csproj">
+      <Project>{93146328-C7BB-F98D-87CD-45792C2B2A84}</Project>
+      <Name>TKL card game.CSharp.Plugins</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Assets\GameController.cs" />
+    <Compile Include="Assets\MyCard.cs" />
     <Compile Include="Assets\NGUI\Examples\Scripts\InventorySystem\Game\EquipItems.cs" />
     <Compile Include="Assets\NGUI\Examples\Scripts\InventorySystem\Game\EquipRandomItem.cs" />
     <Compile Include="Assets\NGUI\Examples\Scripts\InventorySystem\Game\UICursor.cs" />
@@ -201,9 +209,13 @@
     <Compile Include="Assets\NGUI\Scripts\UI\UITooltip.cs" />
     <Compile Include="Assets\NGUI\Scripts\UI\UIViewport.cs" />
     <Compile Include="Assets\Scripts\BlackMask.cs" />
+    <Compile Include="Assets\Scripts\EndButton.cs" />
     <Compile Include="Assets\Scripts\Hero1.cs" />
+    <Compile Include="Assets\Scripts\Hero1Crystal.cs" />
     <Compile Include="Assets\Scripts\Hero2.cs" />
+    <Compile Include="Assets\Scripts\Hero2Crystal.cs" />
     <Compile Include="Assets\Scripts\HeroSelect.cs" />
+    <Compile Include="Assets\Scripts\HistoryCard.cs" />
     <Compile Include="Assets\Scripts\StartMenu.cs" />
     <Compile Include="Assets\Scripts\VSShow.cs" />
   </ItemGroup>
@@ -249,6 +261,7 @@
     <None Include="Assets\NGUI\Resources\Shaders\Unlit - Transparent Packed 2.shader" />
     <None Include="Assets\NGUI\Resources\Shaders\Unlit - Transparent Packed 3.shader" />
     <None Include="Assets\NGUI\Resources\Shaders\Unlit - Transparent Packed.shader" />
+    <None Include="Assets\Plugins\Pixelplacement\iTween\ReadMe!\ReadMe!.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>
