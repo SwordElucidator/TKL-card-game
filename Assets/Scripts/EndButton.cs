@@ -3,15 +3,33 @@ using System.Collections;
 
 public class EndButton : MonoBehaviour {
 
-    private UILabel label;
+    UISprite endbutton;
+    public bool clicked = false;
+    bool can_click = true;
 
     void Awake()
     {
-        label = transform.Find("Label").GetComponent<UILabel>();
+        endbutton = this.GetComponent<UISprite>();
     }
 
 	public void OnEndButtonClick()
     {
-        label.text = "对方回合";
+        can_click = false;
+        clicked = true;
+        this.GetComponent<UIButton>().normalSprite = "enemy_button";
+        this.GetComponent<UIButton>().enabled = false;
+
+    }
+
+    public void enemyButtonClick()
+    {
+        clicked = true;
+    }
+
+    public void enableButton()
+    {
+        can_click = true;
+        this.GetComponent<UIButton>().normalSprite = "end_button";
+        this.GetComponent<UIButton>().enabled = true;
     }
 }

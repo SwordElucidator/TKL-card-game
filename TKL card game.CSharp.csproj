@@ -69,8 +69,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\GameController.cs" />
-    <Compile Include="Assets\MyCard.cs" />
+    <Compile Include="Assets\GameSettings.cs" />
     <Compile Include="Assets\NGUI\Examples\Scripts\InventorySystem\Game\EquipItems.cs" />
     <Compile Include="Assets\NGUI\Examples\Scripts\InventorySystem\Game\EquipRandomItem.cs" />
     <Compile Include="Assets\NGUI\Examples\Scripts\InventorySystem\Game\UICursor.cs" />
@@ -208,18 +207,34 @@
     <Compile Include="Assets\NGUI\Scripts\UI\UITexture.cs" />
     <Compile Include="Assets\NGUI\Scripts\UI\UITooltip.cs" />
     <Compile Include="Assets\NGUI\Scripts\UI\UIViewport.cs" />
-    <Compile Include="Assets\Scripts\BlackMask.cs" />
+    <Compile Include="Assets\Scripts\Areas.cs" />
+    <Compile Include="Assets\Scripts\BGMController.cs" />
+    <Compile Include="Assets\Scripts\BGMLoader.cs" />
+    <Compile Include="Assets\Scripts\Card.cs" />
+    <Compile Include="Assets\Scripts\CardAvator.cs" />
+    <Compile Include="Assets\Scripts\CardGenerator.cs" />
+    <Compile Include="Assets\Scripts\DesCard.cs" />
+    <Compile Include="Assets\Scripts\DragableCard.cs" />
+    <Compile Include="Assets\Scripts\DraggableAvator.cs" />
     <Compile Include="Assets\Scripts\EndButton.cs" />
+    <Compile Include="Assets\Scripts\GameController.cs" />
+    <Compile Include="Assets\Scripts\Hero.cs" />
     <Compile Include="Assets\Scripts\Hero1.cs" />
     <Compile Include="Assets\Scripts\Hero1Crystal.cs" />
     <Compile Include="Assets\Scripts\Hero2.cs" />
     <Compile Include="Assets\Scripts\Hero2Crystal.cs" />
-    <Compile Include="Assets\Scripts\HeroSelect.cs" />
     <Compile Include="Assets\Scripts\HistoryCard.cs" />
-    <Compile Include="Assets\Scripts\StartMenu.cs" />
-    <Compile Include="Assets\Scripts\VSShow.cs" />
+    <Compile Include="Assets\Scripts\MyCard.cs" />
+    <Compile Include="Assets\Scripts\SoundController.cs" />
+    <Compile Include="Assets\Scripts\StartScene\BlackMask.cs" />
+    <Compile Include="Assets\Scripts\StartScene\HeroSelect.cs" />
+    <Compile Include="Assets\Scripts\StartScene\StartMenu.cs" />
+    <Compile Include="Assets\Scripts\StartScene\VSShow.cs" />
+    <Compile Include="Assets\Scripts\enums\CardFile.cs" />
+    <Compile Include="Assets\Scripts\enums\Skill.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\Fonts\test_out.fnt" />
     <None Include="Assets\NGUI\Examples\Atlases\Fantasy\Fantasy Font - Normal.txt" />
     <None Include="Assets\NGUI\Examples\Atlases\Refractive\Refractive Font - Header.txt" />
     <None Include="Assets\NGUI\Examples\Atlases\Refractive\Refractive Font - Normal.txt" />
