@@ -3,10 +3,13 @@ using System.Collections;
 
 public class CardAvator : CardBase
 {
+    public static int totalId = 0;
     public bool isHero1;
-
+    public int avatorId;
     public bool canDoMove = false;
     public bool canDoAttack = false;
+
+    public bool canDirectlyAttackHero = false;
 
     public TweenPosition attackTween;
 
@@ -18,6 +21,8 @@ public class CardAvator : CardBase
 
     void Awake()
     {
+        avatorId = totalId;
+        totalId += 1;
         sprite = this.GetComponent<UISprite>();
         hpLabel = transform.Find("hp_num").GetComponent<UILabel>();
         damageLabel = transform.Find("damage_num").GetComponent<UILabel>();
@@ -149,6 +154,11 @@ public class CardAvator : CardBase
             this.PlaySound("out");
             this.transform.parent.DestroyChildren();
         }
+    }
+    //毁灭时应当把技能也全部毁灭
+    void OnDestroy()
+    {
+        GameObject.Find("GameController").GetComponent<GameController>().removeSkillsFromCard(this);
     }
 
     public void AttackBase()

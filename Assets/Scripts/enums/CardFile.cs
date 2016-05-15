@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public enum TypeAge
 {
@@ -59,10 +60,34 @@ public class CardBase : MonoBehaviour
     public TypeCharacter typeCharacter;
     public TypeMove typeMove;
     public CardType cardType;
-    public Skill[] skills;
+    public List<Skill> skills;
     public bool hasCharge = false;
     public bool hasRush = false;
     public Package package;
+
+    protected Dictionary<string, string> marks = new Dictionary<string, string>();
+    public void setMark(string key, string value)
+    {
+        if (marks.ContainsKey(key))
+        {
+            marks[key] = value;
+        }else
+        {
+            marks.Add(key, value);
+        }
+    }
+
+    public string getMark(string key)
+    {
+        if (!marks.ContainsKey(key))
+            return null;
+        return marks[key];
+    }
+
+    public bool hasSkill(Skill skill)
+    {
+        return skills.Contains(skill);
+    }
 }
 
 //原始卡
@@ -80,12 +105,21 @@ public class CardFile
     public TypeCharacter typeCharacter;
     public TypeMove typeMove;
     public CardType cardType;
-    public Skill[] skills;
+    public List<Skill> skills = new List<Skill>();
     public bool hasCharge = false;
     public bool hasRush = false;
     public Package package;
 
-    public static CardFile makeCardFile(Package package, int cost, int damage, int hp, int attackDistance, string cardName, string heroName, string spriteName, TypeAge typeAge, TypeCharacter typeCharacter, TypeMove typeMove, bool hasRush = false, bool hasCharge = false, CardType cardType = CardType.CharacterCard, Skill[] skills = null)
+    public void addSkill(Skill skill)
+    {
+        if (skills == null)
+        {
+            skills = new List<Skill>();
+        }
+        skills.Add(skill);
+    }
+
+    public static CardFile makeCardFile(Package package, int cost, int damage, int hp, int attackDistance, string cardName, string heroName, string spriteName, TypeAge typeAge, TypeCharacter typeCharacter, TypeMove typeMove, bool hasRush = false, bool hasCharge = false, CardType cardType = CardType.CharacterCard, List<Skill> skills = null)
     {
         CardFile card = new CardFile();
         card.package = package;

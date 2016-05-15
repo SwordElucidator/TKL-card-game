@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Linq;
+using System.Collections.Generic;
 
 public enum GameState
 {
@@ -18,6 +19,8 @@ public class GameController : MonoBehaviour {
     public Hero1 hero1;
     public Hero2 hero2;
 
+    public Dictionary<int, List<Skill>> skillList = new Dictionary<int, List<Skill>>();
+
     public float cycleTime = 60f;
 
     
@@ -31,6 +34,7 @@ public class GameController : MonoBehaviour {
 
     void Awake()
     {
+        skillList[-1] = new List<Skill>();
         wickropeSprite = this.transform.Find("wickrope").GetComponent<UISprite>();
         wickropeLength = wickropeSprite.width;
         wickropeSprite.width = 0;
@@ -44,6 +48,7 @@ public class GameController : MonoBehaviour {
         StartCoroutine(GenerateCardForHero2(3));
         gamestate = GameState.PlayCard;
     }
+
 
     void Update()
     {
@@ -81,6 +86,36 @@ public class GameController : MonoBehaviour {
                 wickropeSprite.width = (int)((cycleTime - timer) / 15f * wickropeLength);
             }
         }
+    }
+
+    public void addSkillsFromCard(CardAvator card)
+    {
+        skillList.Add(card.avatorId, card.skills);
+    }
+
+    public bool removeSkillsFromCard(CardAvator card)
+    {
+        return skillList.Remove(card.avatorId);
+    }
+
+    public List<Skill> getSkillsOn(TriggerEvent e, CardAvator card = null)
+    {
+        List<Skill> list = new List<Skill>();
+        if (card && skillList[card.avatorId] != null)
+        {
+            for (int i =0; i < skillList[card.avatorId].Count; i++)
+            {
+                list.Add(skillList[card.avatorId][i]);
+            }
+        }else
+        {
+            //-1 means global checking skills  TODO
+            for (int i = 0; i < skillList[-1].Count; i++)
+            {
+                list.Add(skillList[-1][i]);
+            }
+        }
+        return list;
     }
 
     private void disableAllPlayerMovement(bool isHero1 = true)

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using System.Collections.Generic;
 
 public class IntVector2
 {
@@ -137,6 +138,8 @@ public class Areas : MonoBehaviour {
         GameObject avator = NGUITools.AddChild(area, area.transform.parent.GetComponent<Areas>().avatorPrefeb);
         avator.GetComponent<CardAvator>().InheritFromCard(card.GetComponent<Card>());
         avator.GetComponent<CardAvator>().PlaySound("in");
+        //加入到技能列表中
+        GameObject.Find("GameController").GetComponent<GameController>().addSkillsFromCard(avator.GetComponent<CardAvator>());
         card.transform.parent.GetComponent<MyCard>().LoseCard(card.gameObject);
         area.transform.parent.GetComponent<Areas>().UpdateShow();
     }
@@ -289,11 +292,25 @@ public class Areas : MonoBehaviour {
         }
 
         IntVector2 dis3 = getDisplacement(current_area, area);
-        if (!dis3.onSameLine())
-            return;
 
         CardAvator card2 = area.transform.GetChild(0).GetComponent<CardAvator>();
-        card.Attack(card2, dis3.getAbsoluteDistance() <= card2.attackDistance);//TODODODODO
+        AttackStruct attStruct = new AttackStruct(card, card2);
+        card.Attack(card2, dis3.getAbsoluteDistance() <= card2.attackDistance && dis3.onSameLine());//TODODODODO
+
+        //这里应该结算attack完成后的情况
+        //如果有技能的情况
+        List<Skill> lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.CardAttacked, card);
+        if (lst.Count > 0)
+        {
+            for (int i = 0; i < lst.Count; i++)
+            {
+                if (lst[i].canTrigger(card, (object)attStruct, TriggerEvent.CardAttacked))
+                {
+                        //这里返回值没想好做什么用
+                    lst[i].OnTrigger(card, (object)attStruct, TriggerEvent.CardAttacked);
+                }
+            }
+        }
 
         card.canDoAttack = false;
         if (!card.hasRush)
@@ -327,6 +344,24 @@ public class Areas : MonoBehaviour {
             return false;
         }
 
+        //如果有技能的情况
+        List<Skill> lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.CardPreAttack, card);
+        if (lst.Count > 0)
+        {
+            for (int i = 0; i < lst.Count; i++)
+            {
+                if (lst[i].canTrigger(card, (object)area.transform.GetChild(0).GetComponent<CardAvator>(), TriggerEvent.CardPreAttack))
+                {
+                    //返回true说明这个技能允许跨距离打击
+                    if (lst[i].OnTrigger(card, (object)area.transform.GetChild(0).GetComponent<CardAvator>(), TriggerEvent.CardPreAttack))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        //普通情况
         IntVector2 dis3 = getDisplacement(current_area, area);
         if (!dis3.onSameLine())
             return false;
@@ -349,8 +384,26 @@ public class Areas : MonoBehaviour {
         {
             return;
         }
+
+        AttackStruct attStruct = new AttackStruct(card, null, card.isHero1, area.name == "hero1");
+
         //不再测试了，所以一定要先call canAttackBase啊！
         card.AttackBase();//TODODODODO
+
+        //这里应该结算attack完成后的情况
+        //如果有技能的情况
+        List<Skill> lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.CardAttacked, card);
+        if (lst.Count > 0)
+        {
+            for (int i = 0; i < lst.Count; i++)
+            {
+                if (lst[i].canTrigger(card, (object)attStruct, TriggerEvent.CardAttacked))
+                {
+                    //这里返回值没想好做什么用
+                    lst[i].OnTrigger(card, (object)attStruct, TriggerEvent.CardAttacked);
+                }
+            }
+        }
 
         card.canDoAttack = false;
         if (!card.hasRush)
@@ -375,6 +428,10 @@ public class Areas : MonoBehaviour {
         if (!card.GetComponent<CardAvator>().canDoAttack)
         {
             return false;
+        }
+        if (card.canDirectlyAttackHero)
+        {
+            return true;
         }
         if (area.name == "hero1")
         {
