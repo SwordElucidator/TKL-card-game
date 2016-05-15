@@ -72,6 +72,7 @@ public class CardAvator : CardBase
         cost = card.cost;
         damage = card.damage;
         hp = card.hp;
+        maxHp = card.maxHp;
         attackDistance = card.attackDistance;
         cardName = card.cardName;
         heroName = card.heroName;

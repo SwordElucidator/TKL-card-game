@@ -73,9 +73,11 @@ public class Card : CardBase
 
     public void InheritFromCardFile(CardFile card, bool isHero1 = true)
     {
+        package = card.package;
         cost = card.cost;
         damage = card.damage;
         hp = card.hp;
+        maxHp = card.hp;
         attackDistance = card.attackDistance;
         cardName = card.cardName;
         heroName = card.heroName;
