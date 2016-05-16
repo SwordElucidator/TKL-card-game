@@ -61,7 +61,7 @@ public class MiraieigouzanSkill : Skill
             {
                 if (attStruct.toCard)
                 {
-                    attStruct.toCard.setMark("MiraiMark", thisCard.avatorId + "");
+                    attStruct.toCard.setMark("MiraiMark" + thisCard.avatorId, "avaliable");
                 }
                 else
                 {
@@ -74,7 +74,7 @@ public class MiraieigouzanSkill : Skill
             CardAvator enemy = (CardAvator)data;
             if (thisCard.hasSkill(this))
             {
-                return enemy.getMark("MiraiMark") != null && enemy.getMark("MiraiMark") == thisCard.avatorId + "";
+                return enemy.getMark("MiraiMark" + thisCard.avatorId) != null && enemy.getMark("MiraiMark" + thisCard.avatorId) == "avaliable";
             }
         }
         return false;

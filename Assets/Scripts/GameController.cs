@@ -18,8 +18,9 @@ public class GameController : MonoBehaviour {
     public EndButton endButton;
     public Hero1 hero1;
     public Hero2 hero2;
+    public static CardAvator FAKEAV = new CardAvator();
 
-    public Dictionary<int, List<Skill>> skillList = new Dictionary<int, List<Skill>>();
+    public Dictionary<CardAvator, List<Skill>> skillList = new Dictionary<CardAvator, List<Skill>>();
 
     public float cycleTime = 60f;
 
@@ -33,9 +34,9 @@ public class GameController : MonoBehaviour {
     private CardGenerator cardGenerator;
 
     void Awake()
-    { 
-        skillList = new Dictionary<int, List<Skill>>();
-        skillList[-1] = new List<Skill>();
+    {
+        skillList = new Dictionary<CardAvator, List<Skill>>();
+        skillList[FAKEAV] = new List<Skill>();
         wickropeSprite = this.transform.Find("wickrope").GetComponent<UISprite>();
         wickropeLength = wickropeSprite.width;
         wickropeSprite.width = 0;
@@ -68,11 +69,12 @@ public class GameController : MonoBehaviour {
                 disableAllPlayerMovement(isCurrentTurnHero1);
 
                 //应当结算currentHero所有牌的回合结算阶段
-
+                triggerTurnSkills(TriggerEvent.OnTurnEnd);
 
                 isCurrentTurnHero1 = !isCurrentTurnHero1;
 
                 //应当结算currentHero所有牌的回合开始阶段
+                triggerTurnSkills(TriggerEvent.OnTurnStart);
 
                 enableAllPlayerMovement(isCurrentTurnHero1);
                 //给一张牌
@@ -98,38 +100,49 @@ public class GameController : MonoBehaviour {
 
     public void triggerTurnSkills(TriggerEvent e)
     {
-        for (int i = 0; i < skillList.Keys.Count; i++)
+        CardAvator[] validcas = skillList.Keys.ToArray();
+        for (int j = 0; j < validcas.Length; j++)
         {
-            int[] validIds = skillList.Keys.ToArray();
-            //TODO do this later
+            List<Skill> lst = getSkillsOn(e, validcas[j]);
+            if (lst.Count > 0)
+            {
+                for (int i = 0; i < lst.Count; i++)
+                {
+                    if (lst[i].canTrigger(validcas[j], (object)isCurrentTurnHero1, e))
+                    {
+                        lst[i].OnTrigger(validcas[j], (object)isCurrentTurnHero1, e);
+                    }
+                }
+            }
         }
     }
 
+
     public void addSkillsFromCard(CardAvator card)
     {
-        skillList.Add(card.avatorId, card.skills);
+        skillList.Add(card, card.skills);
     }
 
     public bool removeSkillsFromCard(CardAvator card)
     {
-        return skillList.Remove(card.avatorId);
+        return skillList.Remove(card);
     }
 
     public List<Skill> getSkillsOn(TriggerEvent e, CardAvator card = null)
     {
         List<Skill> list = new List<Skill>();
-        if (card && skillList[card.avatorId] != null)
+        if (card && skillList[card] != null)
         {
-            for (int i =0; i < skillList[card.avatorId].Count; i++)
+            for (int i =0; i < skillList[card].Count; i++)
             {
-                list.Add(skillList[card.avatorId][i]);
+                list.Add(skillList[card][i]);
             }
         }else
         {
             //-1 means global checking skills  TODO
-            for (int i = 0; i < skillList[-1].Count; i++)
+            for (int i = 0; i < skillList[FAKEAV].Count; i++)
             {
-                list.Add(skillList[-1][i]);
+                list.Add(skillList[FAKEAV][i]);
             }
         }
         return list;
