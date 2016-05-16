@@ -16,6 +16,9 @@ public enum TriggerEvent
     CardIn,
     //使用卡结束时
     CardUsed,
+    //这前面的这些event一般不需要加入到skillList中，除非是全局的。
+
+
     //结算新的移动格子  DONE
     CardPreMove,
     //准备移动时
@@ -40,14 +43,12 @@ public enum TriggerEvent
     OnHpChange,
     //HP变化后  DONE
     HpChanged,
-    //回合结束时
+    //回合结束时  DONE
     OnTurnEnd,
-    //回合开始时
+    //回合开始时  DONE
     OnTurnStart,
     //死亡时  DONE
     OnDying,
-    //离开场时
-    CardOut,
     
 }
 

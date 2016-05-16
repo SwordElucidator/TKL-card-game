@@ -9,6 +9,7 @@ public class CardAvator : CardBase
     public int avatorId;
     public bool canDoMove = false;
     public bool canDoAttack = false;
+    public bool underdoBrainwashing = false;
 
     public bool canDirectlyAttackHero = false;
 
@@ -241,7 +242,7 @@ public class CardAvator : CardBase
                         if (lst[i].OnTrigger(change.card, (object)change, TriggerEvent.OnHpChange))
                         {
                             //说不定要触发一些效果，比如当被终止时可能会比较难看
-
+                            change.card.ResetShow();
                             return false;
                         }
                     }
@@ -262,7 +263,7 @@ public class CardAvator : CardBase
                     }
                 }
             }
-
+            change.card.ResetShow();
             if (change.card.hp <= 0)
             {
                 return true;
@@ -411,6 +412,23 @@ public class CardAvator : CardBase
         if (clip)
         {
             soundController.playSound(clip);
+        }
+    }
+
+    public void doBrainwashing()
+    {
+        underdoBrainwashing = true;
+        changeHp(new HpChangeStruct(this, -1));
+        loseDamage(1);
+        ResetShow();
+    }
+
+    public void loseDamage(int num)
+    {
+        damage -= num;
+        if (damage < 0)
+        {
+            damage = 0;
         }
     }
 }

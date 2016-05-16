@@ -140,6 +140,19 @@ public class Areas : MonoBehaviour {
         avator.GetComponent<CardAvator>().PlaySound("in");
         //加入到技能列表中
         GameObject.Find("GameController").GetComponent<GameController>().addSkillsFromCard(avator.GetComponent<CardAvator>());
+
+        //进去的时候call的方法
+        List<Skill> lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.CardIn, avator.GetComponent<CardAvator>());
+        if (lst.Count > 0)
+        {
+            for (int i = 0; i < lst.Count; i++)
+            {
+                if (lst[i].canTrigger(avator.GetComponent<CardAvator>(), null, TriggerEvent.CardIn))
+                {
+                    lst[i].OnTrigger(avator.GetComponent<CardAvator>(), null, TriggerEvent.CardIn);
+                }
+            }
+        }
         card.transform.parent.GetComponent<MyCard>().LoseCard(card.gameObject);
         area.transform.parent.GetComponent<Areas>().UpdateShow();
     }
@@ -567,8 +580,18 @@ public class Areas : MonoBehaviour {
             {
                 if (areas[i].transform.GetChild(0).GetComponent<CardAvator>().isHero1 == isHero1)
                 {
-                    areas[i].transform.GetChild(0).GetComponent<CardAvator>().canDoAttack = isEnable;
-                    areas[i].transform.GetChild(0).GetComponent<CardAvator>().canDoMove = isEnable;
+                    //洗脑判定
+                    if (isEnable && areas[i].transform.GetChild(0).GetComponent<CardAvator>().underdoBrainwashing)
+                    {
+                        areas[i].transform.GetChild(0).GetComponent<CardAvator>().underdoBrainwashing = false;
+                        areas[i].transform.GetChild(0).GetComponent<CardAvator>().canDoAttack = false;
+                        areas[i].transform.GetChild(0).GetComponent<CardAvator>().canDoMove = false;
+                    }
+                    else
+                    {
+                        areas[i].transform.GetChild(0).GetComponent<CardAvator>().canDoAttack = isEnable;
+                        areas[i].transform.GetChild(0).GetComponent<CardAvator>().canDoMove = isEnable;
+                    }
                     areas[i].transform.GetChild(0).GetComponent<CardAvator>().ResetShow();
                 }
             }
@@ -629,5 +652,19 @@ public class Areas : MonoBehaviour {
            
 
         }
+    }
+
+    public List<CardAvator> getAllActiveAvators(bool isHero1)
+    {
+        List<CardAvator> outs = new List<CardAvator>();
+        for (int i = 0; i < areas.Length; i++)
+        {
+            if (areas[i].transform.childCount > 0 && areas[i].transform.GetChild(0).GetComponent<CardAvator>().isHero1 == isHero1)
+            {
+                outs.Add(areas[i].transform.GetChild(0).GetComponent<CardAvator>());
+            }
+
+        }
+        return outs;
     }
 }

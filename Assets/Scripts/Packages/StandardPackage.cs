@@ -36,6 +36,7 @@ public class StandardPackage : Package {
     {
         CardFile Nico = CardFile.makeCardFile(this, 6, 2, 8, 1, "矢泽妮可", "Divas", "Nico", TypeAge.Otome, TypeCharacter.BlackBelly, TypeMove.Walk);
         CardFile Ranka = CardFile.makeCardFile(this, 7, 1, 9, 1, "兰花·李", "Divas", "Ranka", TypeAge.One, TypeCharacter.Hero, TypeMove.Walk);
+        Ranka.addSkill(new SeikanhikouSkill());
         CardFile Sheryl = CardFile.makeCardFile(this, 7, 2, 5, 1, "雪露·诺姆", "Divas", "Sheryl", TypeAge.Loli, TypeCharacter.Queen, TypeMove.Walk);
         cards.Add(Nico);
         cards.Add(Ranka);
