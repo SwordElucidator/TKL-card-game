@@ -80,3 +80,39 @@ public class MiraieigouzanSkill : Skill
         return false;
     }
 }
+
+//Yukari
+public class KyoukaiSkill : Skill
+{
+    public KyoukaiSkill()
+    {
+        this.name = "Kyoukai";
+        this.chineseName = "境界";
+        this.events.Add(TriggerEvent.CardPreMove);
+    }
+
+    public override bool canTrigger(CardAvator thisCard, object data, TriggerEvent e)
+    {
+        if (e == TriggerEvent.CardPreMove)
+        {
+            if (thisCard.hasSkill(this))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public override bool OnTrigger(CardAvator thisCard, object data, TriggerEvent e)
+    {
+        if (e == TriggerEvent.CardPreMove)
+        {
+            GameObject area = (GameObject)data;
+            if (thisCard.hasSkill(this) &&  area.transform.childCount == 0 && area.tag == "CharacterAvators")
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+}

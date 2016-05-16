@@ -33,7 +33,8 @@ public class GameController : MonoBehaviour {
     private CardGenerator cardGenerator;
 
     void Awake()
-    {
+    { 
+        skillList = new Dictionary<int, List<Skill>>();
         skillList[-1] = new List<Skill>();
         wickropeSprite = this.transform.Find("wickrope").GetComponent<UISprite>();
         wickropeLength = wickropeSprite.width;
@@ -65,7 +66,14 @@ public class GameController : MonoBehaviour {
                 timer = 0;
                 wickropeSprite.width = 0;
                 disableAllPlayerMovement(isCurrentTurnHero1);
+
+                //应当结算currentHero所有牌的回合结算阶段
+
+
                 isCurrentTurnHero1 = !isCurrentTurnHero1;
+
+                //应当结算currentHero所有牌的回合开始阶段
+
                 enableAllPlayerMovement(isCurrentTurnHero1);
                 //给一张牌
 
@@ -85,6 +93,15 @@ public class GameController : MonoBehaviour {
                 //显示绳子动画
                 wickropeSprite.width = (int)((cycleTime - timer) / 15f * wickropeLength);
             }
+        }
+    }
+
+    public void triggerTurnSkills(TriggerEvent e)
+    {
+        for (int i = 0; i < skillList.Keys.Count; i++)
+        {
+            int[] validIds = skillList.Keys.ToArray();
+            //TODO do this later
         }
     }
 

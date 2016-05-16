@@ -18,6 +18,7 @@ public class StandardPackage : Package {
         CardFile Youmu = CardFile.makeCardFile(this, 5, 3, 6, 1, "魂魄妖梦", "Touhou", "Youmu", TypeAge.Loli, TypeCharacter.Tekketsu, TypeMove.Walk, true);
         Youmu.addSkill(new MiraieigouzanSkill());
         CardFile Yukari = CardFile.makeCardFile(this, 9, 5, 9, 2, "八云紫", "Touhou", "Yukari", TypeAge.One, TypeCharacter.Obasan, TypeMove.Fly, true);
+        Yukari.addSkill(new KyoukaiSkill());
         cards.Add(Reimu);
         cards.Add(Youmu);
         cards.Add(Yukari);

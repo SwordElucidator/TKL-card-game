@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class CardAvator : CardBase
 {
@@ -118,6 +119,196 @@ public class CardAvator : CardBase
         
     }
 
+    private static bool doDamage(DamageStruct damage)
+    {
+
+
+        CardAvator from = damage.fromCard;
+        CardAvator to = damage.toCard;
+        List<Skill> lst;
+        if (from)
+        {
+            //trigger OnDamage
+            lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.OnDamage, damage.fromCard);
+            if (lst.Count > 0)
+            {
+                for (int i = 0; i < lst.Count; i++)
+                {
+                    if (lst[i].canTrigger(damage.fromCard, (object)damage, TriggerEvent.OnDamage))
+                    {
+                        //这里返回值应该决定了是否要终止这次伤害
+                        //OnTrigger应当有修正目标的能力 这个修正可以由对damage的直接修正来实现，因为c#的boxing是很厉害的
+                        if (lst[i].OnTrigger(damage.fromCard, (object)damage, TriggerEvent.OnDamage))
+                        {
+                            //说不定要触发一些效果，比如当damage被终止时可能会比较难看
+
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+
+
+        if (to)
+        {
+            //trigger OnDamaged
+            lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.OnDamaged, damage.toCard);
+            if (lst.Count > 0)
+            {
+                for (int i = 0; i < lst.Count; i++)
+                {
+                    if (lst[i].canTrigger(damage.fromCard, (object)damage, TriggerEvent.OnDamaged))
+                    {
+                        //这里返回值应该决定了是否要终止这次伤害
+                        //OnTrigger应当有修正目标的能力 这个修正可以由对damage的直接修正来实现，因为c#的boxing是很厉害的
+                        if (lst[i].OnTrigger(damage.fromCard, (object)damage, TriggerEvent.OnDamaged))
+                        {
+                            //说不定要触发一些效果，比如当damage被终止时可能会比较难看
+
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            if (changeHp(new HpChangeStruct(to, -damage.damage)))
+                return true;
+        }
+        else
+        {
+            if (changeHp(new HpChangeStruct(damage.toHero1, -damage.damage)))
+            {
+                return true;
+            }
+        }
+        if (from)
+        {
+            //trigger Damage
+            lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.Damage, damage.fromCard);
+            if (lst.Count > 0)
+            {
+                for (int i = 0; i < lst.Count; i++)
+                {
+                    if (lst[i].canTrigger(damage.fromCard, (object)damage, TriggerEvent.Damage))
+                    {
+                        lst[i].OnTrigger(damage.fromCard, (object)damage, TriggerEvent.Damage);
+                    }
+                }
+            }
+        }
+            
+        if (to)
+        {
+            //trigger Damaged
+            lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.Damaged, damage.toCard);
+            if (lst.Count > 0)
+            {
+                for (int i = 0; i < lst.Count; i++)
+                {
+                    if (lst[i].canTrigger(damage.fromCard, (object)damage, TriggerEvent.Damaged))
+                    {
+                        lst[i].OnTrigger(damage.fromCard, (object)damage, TriggerEvent.Damaged);
+                    }
+                }
+            }
+        }
+
+        
+
+        return false;
+    }
+
+    public static bool changeHp(HpChangeStruct change)
+    {
+        //return true if hp <= 0
+
+
+        List<Skill> lst;
+
+        if (change.card)
+        {
+            //trigger OnHpChange
+            lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.OnHpChange, change.card);
+            if (lst.Count > 0)
+            {
+                for (int i = 0; i < lst.Count; i++)
+                {
+                    if (lst[i].canTrigger(change.card, (object)change, TriggerEvent.OnHpChange))
+                    {
+                        //这里返回值应该决定了是否要终止这次体力变化
+                        //OnTrigger应当有修正目标的能力 这个修正可以由对damage的直接修正来实现，因为c#的boxing是很厉害的
+                        if (lst[i].OnTrigger(change.card, (object)change, TriggerEvent.OnHpChange))
+                        {
+                            //说不定要触发一些效果，比如当被终止时可能会比较难看
+
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            change.card.hp += change.value;
+
+            //trigger HpChanged
+            lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.HpChanged, change.card);
+            if (lst.Count > 0)
+            {
+                for (int i = 0; i < lst.Count; i++)
+                {
+                    if (lst[i].canTrigger(change.card, (object)change, TriggerEvent.HpChanged))
+                    {
+                        lst[i].OnTrigger(change.card, (object)change, TriggerEvent.HpChanged);
+                    }
+                }
+            }
+
+            if (change.card.hp <= 0)
+            {
+                return true;
+            }
+        }else
+        {
+            Transform toHero;
+            if (change.isHero1)
+            {
+                toHero = GameObject.Find("hero1").transform;
+            }
+            else
+            {
+                toHero = GameObject.Find("hero2").transform;
+            }
+            int newHp = int.Parse(toHero.Find("hp").GetComponent<UILabel>().text) + change.value;
+            toHero.Find("hp").GetComponent<UILabel>().text = newHp + "";
+            if (newHp <= 0)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void kill(DeathStruct death)
+    {
+        //TODO 播放死亡动画之类的
+
+        //trigger HpChanged
+        List<Skill> lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.OnDying, death.card);
+        if (lst.Count > 0)
+        {
+            for (int i = 0; i < lst.Count; i++)
+            {
+                if (lst[i].canTrigger(death.card, (object)death, TriggerEvent.HpChanged))
+                {
+                    lst[i].OnTrigger(death.card, (object)death, TriggerEvent.HpChanged);
+                }
+            }
+        }
+
+
+        death.card.transform.parent.DestroyChildren();
+    }
+
     
 
     private IEnumerator attackAnime(CardAvator card, bool can_counter = true) {
@@ -126,11 +317,14 @@ public class CardAvator : CardBase
         attackTween.to = toPos;
         attackTween.PlayForward();
         yield return new WaitForSeconds(0.62f);
-
-        card.hp -= this.damage;
+        DamageStruct damage = new DamageStruct(this, card, this.damage);
+        DamageStruct damage2 = null;
+        bool cardDead = doDamage(damage);
+        bool thisDead = false;
         if (can_counter)
         {
-            this.hp -= card.damage;
+            damage2 = new DamageStruct(card, this, card.damage);
+            thisDead = doDamage(damage2);
         }
         this.ResetShow();
         card.ResetShow();
@@ -139,20 +333,20 @@ public class CardAvator : CardBase
         //结束后归位
         this.transform.parent.parent.GetComponent<Areas>().UpdateShow();
 
-        if (card.hp <= 0)
+        if (cardDead)
         {
             //TODO 播放死亡动画
             if (this.hp > 0)
             {
                 card.PlaySound("out");
             }
-            card.transform.parent.DestroyChildren();
+            kill(new DeathStruct(card, damage));
         }
-        if (this.hp <= 0)
+        if (thisDead)
         {
             //TODO 播放死亡动画
             this.PlaySound("out");
-            this.transform.parent.DestroyChildren();
+            kill(new DeathStruct(this, damage2));
         }
     }
     //毁灭时应当把技能也全部毁灭
@@ -178,13 +372,16 @@ public class CardAvator : CardBase
         {
             toHero = this.transform.parent.parent.parent.Find("hero1");
         }
+
+        
+
         attackTween.to = toHero.localPosition - this.transform.parent.localPosition;
         attackTween.PlayForward();
         yield return new WaitForSeconds(0.62f);
 
-        int newHp = int.Parse(toHero.Find("hp").GetComponent<UILabel>().text) - this.damage;
-        toHero.Find("hp").GetComponent<UILabel>().text = newHp + "";
-        if (newHp <= 0)
+        DamageStruct damage = new DamageStruct(this, null, false, !this.isHero1, this.damage);
+        bool heroDead = doDamage(damage);
+        if (heroDead)
         {
             //gameover判定
 

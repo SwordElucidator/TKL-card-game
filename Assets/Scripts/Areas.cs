@@ -223,6 +223,25 @@ public class Areas : MonoBehaviour {
             return false;
         }
 
+        //移动范围类技能的触发点
+        //如果有技能的情况
+        //Trigger CardPreAttack Skills
+        List<Skill> lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.CardPreMove, card);
+        if (lst.Count > 0)
+        {
+            for (int i = 0; i < lst.Count; i++)
+            {
+                if (lst[i].canTrigger(card, (object)area, TriggerEvent.CardPreMove))
+                {
+                    //返回true说明这个技能允许特殊移动
+                    if (lst[i].OnTrigger(card, (object)area, TriggerEvent.CardPreMove))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
 
         //如果类型是CharacterCard那么就要自己这边的两排
         if (card.cardType == CardType.CharacterCard)
@@ -291,15 +310,41 @@ public class Areas : MonoBehaviour {
             area = area.transform.parent.gameObject;
         }
 
+
+
         IntVector2 dis3 = getDisplacement(current_area, area);
 
         CardAvator card2 = area.transform.GetChild(0).GetComponent<CardAvator>();
-        AttackStruct attStruct = new AttackStruct(card, card2);
-        card.Attack(card2, dis3.getAbsoluteDistance() <= card2.attackDistance && dis3.onSameLine());//TODODODODO
+        AttackStruct attStruct = new AttackStruct(card, card2, dis3.getAbsoluteDistance() <= card2.attackDistance && dis3.onSameLine());
+
+        //这里应该结算正要attack的情形，这里如果被终止的话有时会触发attack结算完毕的事件，需要技能本身来定义
+        //如果有技能的情况
+        //Trigger CardOnAttack Skills
+        List<Skill> lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.CardOnAttack, card);
+        if (lst.Count > 0)
+        {
+            for (int i = 0; i < lst.Count; i++)
+            {
+                if (lst[i].canTrigger(card, (object)attStruct, TriggerEvent.CardOnAttack))
+                {
+                    //这里返回值应该决定了是否要终止这次攻击
+                    //OnTrigger应当有修正目标的能力 这个修正可以由对attStruct的直接修正来实现，因为c#的boxing是很厉害的
+                    if (lst[i].OnTrigger(card, (object)attStruct, TriggerEvent.CardOnAttack))
+                    {
+                        //说不定要触发一些效果，比如当attack被终止时可能会比较难看
+                        
+                        return;
+                    }
+                }
+            }
+        }
+
+        card.Attack(attStruct.toCard, attStruct.canCounter);
 
         //这里应该结算attack完成后的情况
         //如果有技能的情况
-        List<Skill> lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.CardAttacked, card);
+        //Trigger CardAttacked Skills
+        lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.CardAttacked, card);
         if (lst.Count > 0)
         {
             for (int i = 0; i < lst.Count; i++)
@@ -345,6 +390,7 @@ public class Areas : MonoBehaviour {
         }
 
         //如果有技能的情况
+        //Trigger CardPreAttack Skills
         List<Skill> lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.CardPreAttack, card);
         if (lst.Count > 0)
         {
@@ -387,12 +433,35 @@ public class Areas : MonoBehaviour {
 
         AttackStruct attStruct = new AttackStruct(card, null, card.isHero1, area.name == "hero1");
 
+        //这里应该结算正要attack的情形，这里如果被终止的话有时会触发attack结算完毕的事件，需要技能本身来定义
+        //如果有技能的情况
+        //Trigger CardOnAttack Skills
+        List<Skill> lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.CardOnAttack, card);
+        if (lst.Count > 0)
+        {
+            for (int i = 0; i < lst.Count; i++)
+            {
+                if (lst[i].canTrigger(card, (object)attStruct, TriggerEvent.CardOnAttack))
+                {
+                    //这里返回值应该决定了是否要终止这次攻击
+                    //OnTrigger应当有修正目标的能力 这个修正可以由对attStruct的直接修正来实现，因为c#的boxing是很厉害的
+                    if (lst[i].OnTrigger(card, (object)attStruct, TriggerEvent.CardOnAttack))
+                    {
+                        //说不定要触发一些效果，比如当attack被终止时可能会比较难看
+
+                        return;
+                    }
+                }
+            }
+        }
+
         //不再测试了，所以一定要先call canAttackBase啊！
         card.AttackBase();//TODODODODO
 
         //这里应该结算attack完成后的情况
         //如果有技能的情况
-        List<Skill> lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.CardAttacked, card);
+        //Trigger CardAttacked Skills
+        lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.CardAttacked, card);
         if (lst.Count > 0)
         {
             for (int i = 0; i < lst.Count; i++)
