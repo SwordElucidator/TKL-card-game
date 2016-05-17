@@ -13,8 +13,14 @@ public class CardAvator : CardBase
 
     public bool canDirectlyAttackHero = false;
 
-    public TweenPosition attackTween;
-    public TweenScale attackTween2;
+    private TweenPosition thisTweenPosition;
+    private TweenScale thisTweenScale;
+
+    private TweenPosition attackTweenPosition;
+    private TweenScale attackTweenScale;
+
+    private TweenPosition avatorInTweenPosition;
+    private TweenScale avatorInTweenScale;
 
     private UISprite sprite;
     private UILabel hpLabel;
@@ -33,6 +39,12 @@ public class CardAvator : CardBase
         attackDistanceLabel = transform.Find("attackDistance_num").GetComponent<UILabel>();
         soundController = GameObject.Find("FightCard").GetComponent<SoundController>();
         animatorSprite = this.transform.Find("animator").GetComponent<UISprite>();
+        attackTweenPosition = GameObject.Find("AvatorAttack").GetComponent<TweenPosition>();
+        attackTweenScale = GameObject.Find("AvatorAttack").GetComponent<TweenScale>();
+        avatorInTweenPosition = GameObject.Find("AvatorIn").GetComponent<TweenPosition>();
+        avatorInTweenScale = GameObject.Find("AvatorIn").GetComponent<TweenScale>();
+        thisTweenPosition = this.GetComponent<TweenPosition>();
+        thisTweenScale = this.GetComponent<TweenScale>();
     }
 
     void OnHover(bool isHovered)
@@ -56,6 +68,7 @@ public class CardAvator : CardBase
 
     public void ResetShow()
     {//更新血量伤害的显示 更新sprite显示
+        this.GetComponent< UIWidget >().depth = 2;
         damageLabel.text = damage + "";
         hpLabel.text = hp + "";
         attackDistanceLabel.text = attackDistance + "";
@@ -319,10 +332,11 @@ public class CardAvator : CardBase
         //播放攻击动画
         this.GetComponent<UIWidget>().width = 80;
         this.ResetPos();
+        setUpTween(attackTweenPosition, attackTweenScale);
         Vector3 toPos = card.transform.parent.localPosition - this.transform.parent.localPosition;
-        attackTween.to = toPos;
-        attackTween.PlayForward();
-        attackTween2.PlayForward();
+        thisTweenPosition.to = toPos;
+        thisTweenPosition.PlayForward();
+        thisTweenScale.PlayForward();
         yield return new WaitForSeconds(0.85f);
         DamageStruct damage = new DamageStruct(this, card, this.damage);
         DamageStruct damage2 = null;
@@ -339,8 +353,8 @@ public class CardAvator : CardBase
         this.ResetShow();
         card.ResetShow();
         yield return new WaitForSeconds(0.75f);
-        attackTween.ResetToBeginning();
-        attackTween2.ResetToBeginning();
+        thisTweenPosition.ResetToBeginning();
+        thisTweenScale.ResetToBeginning();
         //结束后归位
         this.transform.parent.parent.GetComponent<Areas>().UpdateShow();
 
@@ -379,10 +393,10 @@ public class CardAvator : CardBase
             toHero = this.transform.parent.parent.parent.Find("hero1");
         }
 
-
-        attackTween.to = toHero.localPosition - this.transform.parent.localPosition;
-        attackTween.PlayForward();
-        attackTween2.PlayForward();
+        setUpTween(attackTweenPosition, attackTweenScale);
+        thisTweenPosition.to = toHero.localPosition - this.transform.parent.localPosition;
+        thisTweenPosition.PlayForward();
+        thisTweenScale.PlayForward();
         yield return new WaitForSeconds(0.85f);
 
         DamageStruct damage = new DamageStruct(this, null, false, !this.isHero1, this.damage);
@@ -396,10 +410,29 @@ public class CardAvator : CardBase
 
         this.ResetShow();
         yield return new WaitForSeconds(0.75f);
-        attackTween.ResetToBeginning();
-        attackTween2.ResetToBeginning();
+        thisTweenPosition.ResetToBeginning();
+        thisTweenScale.ResetToBeginning();
         //结束后归位
         this.transform.parent.parent.GetComponent<Areas>().UpdateShow();
+    }
+
+    public void doSet()
+    {
+        StartCoroutine(setAnime());
+    }
+
+    public IEnumerator setAnime()
+    {
+        setUpTween(avatorInTweenPosition, avatorInTweenScale);
+        this.GetComponent<UIWidget>().depth = 99;
+        thisTweenPosition.PlayForward();
+        thisTweenScale.PlayForward();
+        yield return new WaitForSeconds(1f);
+        thisTweenPosition.ResetToBeginning();
+        thisTweenScale.ResetToBeginning();
+        this.ResetPos();
+        this.ResetShow();
+
     }
 
     public void PlaySound(string type)
@@ -457,5 +490,28 @@ public class CardAvator : CardBase
         animatorSprite.spriteName = animatorSprite.atlas.spriteList[0].name;
         animatorSprite.GetComponent<UISpriteAnimation>().framesPerSecond = frameRate;
         animatorSprite.GetComponent<UISpriteAnimation>().Play();
+    }
+
+    private void setUpTween(TweenPosition tp, TweenScale ts)
+    {
+        thisTweenPosition.from = tp.from;
+        thisTweenPosition.to = tp.to;
+        thisTweenPosition.style = tp.style;
+        thisTweenPosition.animationCurve = tp.animationCurve;
+        thisTweenPosition.duration = tp.duration;
+        thisTweenPosition.delay = tp.delay;
+        thisTweenPosition.tweenGroup = tp.tweenGroup;
+        thisTweenPosition.ignoreTimeScale = tp.ignoreTimeScale;
+        thisTweenPosition.onFinished = tp.onFinished;
+
+        thisTweenScale.from = ts.from;
+        thisTweenScale.to = ts.to;
+        thisTweenScale.style = ts.style;
+        thisTweenScale.animationCurve = ts.animationCurve;
+        thisTweenScale.duration = ts.duration;
+        thisTweenScale.delay = ts.delay;
+        thisTweenScale.tweenGroup = ts.tweenGroup;
+        thisTweenScale.ignoreTimeScale = ts.ignoreTimeScale;
+        thisTweenScale.onFinished = ts.onFinished;
     }
 }

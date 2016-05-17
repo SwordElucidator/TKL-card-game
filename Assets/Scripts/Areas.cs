@@ -137,6 +137,8 @@ public class Areas : MonoBehaviour {
     {
         GameObject avator = NGUITools.AddChild(area, area.transform.parent.GetComponent<Areas>().avatorPrefeb);
         avator.GetComponent<CardAvator>().InheritFromCard(card.GetComponent<Card>());
+        //doSet会handleupdateShow的职责
+        avator.GetComponent<CardAvator>().doSet();
         avator.GetComponent<CardAvator>().PlaySound("in");
         //加入到技能列表中
         GameObject.Find("GameController").GetComponent<GameController>().addSkillsFromCard(avator.GetComponent<CardAvator>());
@@ -154,7 +156,7 @@ public class Areas : MonoBehaviour {
             }
         }
         card.transform.parent.GetComponent<MyCard>().LoseCard(card.gameObject);
-        area.transform.parent.GetComponent<Areas>().UpdateShow();
+        //area.transform.parent.GetComponent<Areas>().UpdateShow();
     }
 
     public static bool CanSet(Card card, GameObject area, bool is_hero1 = true)
