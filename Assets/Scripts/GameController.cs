@@ -125,7 +125,15 @@ public class GameController : MonoBehaviour {
 
     public bool removeSkillsFromCard(CardAvator card)
     {
-        return skillList.Remove(card);
+        if (skillList.ContainsKey(card))
+        {
+            return skillList.Remove(card);
+        }else
+        {
+            MonoBehaviour.print("Alert: did not find skill to delete for avator " + card.spriteName + card.avatorId);
+            return false;
+        }
+        
     }
 
     public List<Skill> getSkillsOn(TriggerEvent e, CardAvator card = null)

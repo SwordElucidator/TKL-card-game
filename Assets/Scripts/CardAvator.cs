@@ -14,12 +14,14 @@ public class CardAvator : CardBase
     public bool canDirectlyAttackHero = false;
 
     public TweenPosition attackTween;
+    public TweenScale attackTween2;
 
     private UISprite sprite;
     private UILabel hpLabel;
     private UILabel damageLabel;
     private UILabel attackDistanceLabel;
     private SoundController soundController;
+    private UISprite animatorSprite;
 
     void Awake()
     {
@@ -30,6 +32,7 @@ public class CardAvator : CardBase
         damageLabel = transform.Find("damage_num").GetComponent<UILabel>();
         attackDistanceLabel = transform.Find("attackDistance_num").GetComponent<UILabel>();
         soundController = GameObject.Find("FightCard").GetComponent<SoundController>();
+        animatorSprite = this.transform.Find("animator").GetComponent<UISprite>();
     }
 
     void OnHover(bool isHovered)
@@ -306,7 +309,7 @@ public class CardAvator : CardBase
             }
         }
 
-
+        GameObject.Find("GameController").GetComponent<GameController>().removeSkillsFromCard(death.card);
         death.card.transform.parent.DestroyChildren();
     }
 
@@ -314,13 +317,19 @@ public class CardAvator : CardBase
 
     private IEnumerator attackAnime(CardAvator card, bool can_counter = true) {
         //播放攻击动画
+        this.GetComponent<UIWidget>().width = 80;
+        this.ResetPos();
         Vector3 toPos = card.transform.parent.localPosition - this.transform.parent.localPosition;
         attackTween.to = toPos;
         attackTween.PlayForward();
-        yield return new WaitForSeconds(0.62f);
+        attackTween2.PlayForward();
+        yield return new WaitForSeconds(0.85f);
         DamageStruct damage = new DamageStruct(this, card, this.damage);
         DamageStruct damage2 = null;
         bool cardDead = doDamage(damage);
+        //try shake animation;
+        card.playAnimation("bump", 30);
+        card.shake(0.2f, 0.02f);
         bool thisDead = false;
         if (can_counter)
         {
@@ -329,8 +338,9 @@ public class CardAvator : CardBase
         }
         this.ResetShow();
         card.ResetShow();
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.75f);
         attackTween.ResetToBeginning();
+        attackTween2.ResetToBeginning();
         //结束后归位
         this.transform.parent.parent.GetComponent<Areas>().UpdateShow();
 
@@ -349,11 +359,6 @@ public class CardAvator : CardBase
             this.PlaySound("out");
             kill(new DeathStruct(this, damage2));
         }
-    }
-    //毁灭时应当把技能也全部毁灭
-    void OnDestroy()
-    {
-        GameObject.Find("GameController").GetComponent<GameController>().removeSkillsFromCard(this);
     }
 
     public void AttackBase()
@@ -374,11 +379,11 @@ public class CardAvator : CardBase
             toHero = this.transform.parent.parent.parent.Find("hero1");
         }
 
-        
 
         attackTween.to = toHero.localPosition - this.transform.parent.localPosition;
         attackTween.PlayForward();
-        yield return new WaitForSeconds(0.62f);
+        attackTween2.PlayForward();
+        yield return new WaitForSeconds(0.85f);
 
         DamageStruct damage = new DamageStruct(this, null, false, !this.isHero1, this.damage);
         bool heroDead = doDamage(damage);
@@ -390,8 +395,9 @@ public class CardAvator : CardBase
         
 
         this.ResetShow();
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.75f);
         attackTween.ResetToBeginning();
+        attackTween2.ResetToBeginning();
         //结束后归位
         this.transform.parent.parent.GetComponent<Areas>().UpdateShow();
     }
@@ -418,7 +424,10 @@ public class CardAvator : CardBase
     public void doBrainwashing()
     {
         underdoBrainwashing = true;
-        changeHp(new HpChangeStruct(this, -1));
+        playAnimation("brain", 40);
+        if (changeHp(new HpChangeStruct(this, -1))){
+            kill(new DeathStruct(this, null));
+        }
         loseDamage(1);
         ResetShow();
     }
@@ -430,5 +439,23 @@ public class CardAvator : CardBase
         {
             damage = 0;
         }
+    }
+
+    //UI
+    private void shake(float time, float ratio)
+    {
+        iTween.ShakePosition(this.gameObject, new Vector3(ratio, ratio, 0), time);
+    }
+    
+    //do animation, need to be added on the prefab of avator
+    private void playAnimation(string name,int frameRate)
+    {
+        animatorSprite.GetComponent<UISpriteAnimation>().enabled = true;
+        GameObject atlas = Resources.Load<GameObject>("Effects/" + name);
+        MonoBehaviour.print(atlas);
+        animatorSprite.atlas = atlas.GetComponent<UIAtlas>();
+        animatorSprite.spriteName = animatorSprite.atlas.spriteList[0].name;
+        animatorSprite.GetComponent<UISpriteAnimation>().framesPerSecond = frameRate;
+        animatorSprite.GetComponent<UISpriteAnimation>().Play();
     }
 }

@@ -11,7 +11,7 @@ public class BGMController : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        if (!GameObject.Find("BGMScript"))
+        if (!GameObject.Find("BGMScript") || !GameObject.Find("BGMScript").GetComponent<BGMLoader>())
         {
             MonoBehaviour.print("No BGMLoader Found, it must be from the first scene");
         }
