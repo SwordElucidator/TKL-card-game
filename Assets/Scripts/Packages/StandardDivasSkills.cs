@@ -27,10 +27,47 @@ public class SeikanhikouSkill : Skill
     {
         if (e == TriggerEvent.CardIn)
         {
-            List<CardAvator> cards = thisCard.transform.parent.parent.GetComponent<Areas>().getAllActiveAvators(!thisCard.isHero1);
+            List<CardAvator> cards = thisCard.getEnemyCards();
             for (int i = 0; i < cards.Count; i++)
             {
                 cards[i].doBrainwashing();
+            }
+            //舰载机，等会写
+        }
+        return false;
+    }
+
+}
+
+public class DiamondCrevasseSkill : Skill
+{
+    public DiamondCrevasseSkill()
+    {
+        this.name = "DiamondCrevasse";
+        this.chineseName = "钻石裂痕";
+        this.events.Add(TriggerEvent.OnTurnStart);
+    }
+
+    public override bool canTrigger(CardAvator thisCard, object data, TriggerEvent e)
+    {
+        if (e == TriggerEvent.OnTurnStart)
+        {
+            if (thisCard.hasSkill(this) && (bool)data == thisCard.isHero1)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public override bool OnTrigger(CardAvator thisCard, object data, TriggerEvent e)
+    {
+        if (e == TriggerEvent.OnTurnStart)
+        {
+            List<CardAvator> cards = thisCard.getSelfCards();
+            for (int i = 0; i < cards.Count; i++)
+            {
+                cards[i].doMotivate(0, 1);
             }
             //舰载机，等会写
         }

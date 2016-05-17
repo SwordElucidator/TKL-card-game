@@ -465,6 +465,22 @@ public class CardAvator : CardBase
         ResetShow();
     }
 
+    public void doMotivate(int hp, int damage)
+    {
+        playAnimation("motivate", 40);
+        if (changeHp(new HpChangeStruct(this, hp)))
+        {
+            kill(new DeathStruct(this, null));
+        }
+        addDamage(1);
+        ResetShow();
+    }
+
+    public void addDamage(int num)
+    {
+        damage += num;
+    }
+
     public void loseDamage(int num)
     {
         damage -= num;
@@ -472,6 +488,16 @@ public class CardAvator : CardBase
         {
             damage = 0;
         }
+    }
+
+    public List<CardAvator> getEnemyCards(bool all = false)
+    {
+        return this.transform.parent.parent.GetComponent<Areas>().getAllActiveAvators(!this.isHero1, all);
+    }
+
+    public List<CardAvator> getSelfCards(bool all = false)
+    {
+        return this.transform.parent.parent.GetComponent<Areas>().getAllActiveAvators(this.isHero1, all);
     }
 
     //UI
@@ -483,12 +509,15 @@ public class CardAvator : CardBase
     //do animation, need to be added on the prefab of avator
     private void playAnimation(string name,int frameRate)
     {
+
         animatorSprite.GetComponent<UISpriteAnimation>().enabled = true;
         GameObject atlas = Resources.Load<GameObject>("Effects/" + name);
         MonoBehaviour.print(atlas);
         animatorSprite.atlas = atlas.GetComponent<UIAtlas>();
         animatorSprite.spriteName = animatorSprite.atlas.spriteList[0].name;
         animatorSprite.GetComponent<UISpriteAnimation>().framesPerSecond = frameRate;
+        animatorSprite.GetComponent<UISpriteAnimation>().RebuildSpriteList();
+        animatorSprite.GetComponent<UISpriteAnimation>().ResetToBeginning();
         animatorSprite.GetComponent<UISpriteAnimation>().Play();
     }
 

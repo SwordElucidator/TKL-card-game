@@ -656,14 +656,15 @@ public class Areas : MonoBehaviour {
         }
     }
 
-    public List<CardAvator> getAllActiveAvators(bool isHero1)
+    public List<CardAvator> getAllActiveAvators(bool isHero1, bool all = false)
     {
         List<CardAvator> outs = new List<CardAvator>();
         for (int i = 0; i < areas.Length; i++)
         {
             if (areas[i].transform.childCount > 0 && areas[i].transform.GetChild(0).GetComponent<CardAvator>().isHero1 == isHero1)
             {
-                outs.Add(areas[i].transform.GetChild(0).GetComponent<CardAvator>());
+                if (all || areas[i].transform.GetChild(0).GetComponent<CardAvator>().cardType == CardType.CharacterCard)
+                    outs.Add(areas[i].transform.GetChild(0).GetComponent<CardAvator>());
             }
 
         }
