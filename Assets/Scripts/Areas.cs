@@ -56,6 +56,11 @@ public class Areas : MonoBehaviour {
     public static IntVector2 Hero1vec1 = new IntVector2(3, 4);
     public static IntVector2 Hero1vec2 = new IntVector2(4, 4);
 
+
+    public static CardAvator ClickedAvator;
+    public static bool IsButtonClicked = false;
+    public static bool IsButtonsOnUse = false;
+
     private GameObject[] areas;
 
     void Awake()
@@ -152,6 +157,7 @@ public class Areas : MonoBehaviour {
                 if (lst[i].canTrigger(avator.GetComponent<CardAvator>(), null, TriggerEvent.CardIn))
                 {
                     lst[i].OnTrigger(avator.GetComponent<CardAvator>(), null, TriggerEvent.CardIn);
+                    area.transform.parent.GetComponent<Areas>().StartCoroutine(lst[i].waitForResult(avator.GetComponent<CardAvator>(), null, TriggerEvent.CardIn));
                 }
             }
         }
@@ -196,6 +202,7 @@ public class Areas : MonoBehaviour {
     public static void Move(CardAvator card, GameObject area)
     {
         //如果是步行到一个有怪的区域，则将其拿起
+        card.GetComponent<UIWidget>().depth = 99;
         Transform old = null;
         if (area.transform.childCount > 0)
         {
@@ -211,6 +218,7 @@ public class Areas : MonoBehaviour {
         }
 
         card.canDoMove = false;
+        card.moved = true;
         if (!card.hasRush)
         {
             card.canDoAttack = false;
@@ -373,6 +381,7 @@ public class Areas : MonoBehaviour {
         }
 
         card.canDoAttack = false;
+        card.attacked = true;
         if (!card.hasRush)
         {
             card.canDoMove = false;
@@ -427,6 +436,42 @@ public class Areas : MonoBehaviour {
         if (!dis3.onSameLine())
             return false;
         return Math.Abs(dis3.x) <= card.attackDistance && Math.Abs(dis3.y) <= card.attackDistance;
+    }
+
+    public Hero getHero(bool isHero1)
+    {
+        if (isHero1)
+        {
+            return GameObject.Find("hero1").GetComponent<Hero1>();
+        }
+        return GameObject.Find("hero2").GetComponent<Hero2>();
+    }
+
+    public List<CardAvator> getNearbyAvators(CardAvator card)
+    {
+        List<CardAvator> outs = new List<CardAvator>();
+        List < CardAvator > cards = getAllActiveAvatorsOfBothHerosByType();
+        for (int i = 0; i < cards.Count; i++)
+        {
+            IntVector2 dis3 = getDisplacement(card.transform.parent.gameObject, cards[i].transform.parent.gameObject);
+            if (dis3.onSameLine() && Math.Abs(dis3.x) <= 1 && Math.Abs(dis3.y) <= 1)
+            {
+                outs.Add(cards[i]);
+            }
+        }
+        return outs;
+    }
+
+    public bool isHeroNearby(CardAvator card, bool isHero1)
+    {
+        if (!isHero1)
+        {
+            return getID(card.transform.parent.gameObject) == 3 || getID(card.transform.parent.gameObject) == 4;
+        }
+        else
+        {
+            return getID(card.transform.parent.gameObject) == 27 || getID(card.transform.parent.gameObject) == 28;
+        }
     }
 
     public static void AttackBase(CardAvator card, GameObject area)
@@ -490,6 +535,7 @@ public class Areas : MonoBehaviour {
         }
 
         card.canDoAttack = false;
+        card.attacked = true;
         if (!card.hasRush)
         {
             card.canDoMove = false;
@@ -562,6 +608,7 @@ public class Areas : MonoBehaviour {
                 areas[i].transform.GetChild(0).GetComponent<CardAvator>().ResetShow();
 
                 //评定可否移动
+                /*
                 if (!areas[i].transform.GetChild(0).GetComponent<CardAvator>().isHero1 || (!areas[i].transform.GetChild(0).GetComponent<CardAvator>().canDoAttack && !areas[i].transform.GetChild(0).GetComponent<CardAvator>().canDoMove))
                 {
                     areas[i].transform.GetChild(0).GetComponent<DraggableAvator>().enabled = false;
@@ -570,10 +617,12 @@ public class Areas : MonoBehaviour {
                 {
                     areas[i].transform.GetChild(0).GetComponent<DraggableAvator>().enabled = true;
                 }
+                */
             }
         }
     }
 
+    //用于回合初
     public void changeAllAvatorsStatus(bool isEnable,bool isHero1 = true)
     {
         for (int i = 0; i < areas.Length; i++)
@@ -594,10 +643,48 @@ public class Areas : MonoBehaviour {
                         areas[i].transform.GetChild(0).GetComponent<CardAvator>().canDoAttack = isEnable;
                         areas[i].transform.GetChild(0).GetComponent<CardAvator>().canDoMove = isEnable;
                     }
+                    areas[i].transform.GetChild(0).GetComponent<CardAvator>().moved = false;
+                    areas[i].transform.GetChild(0).GetComponent<CardAvator>().attacked = false;
                     areas[i].transform.GetChild(0).GetComponent<CardAvator>().ResetShow();
                 }
             }
 
+        }
+        UpdateShow();
+    }
+
+    //关掉所有的可拖拽
+    public void stopAllAvatorDraggable()
+    {
+        UpdateShow();
+        for (int i = 0; i < areas.Length; i++)
+        {
+            if (areas[i].transform.childCount > 0)
+            {
+                areas[i].transform.GetChild(0).GetComponent<UISprite>().color = new Color(0.5F, 0.5F, 0.5F);
+                areas[i].transform.GetChild(0).GetComponent<DraggableAvator>().enabled = false;
+            }
+
+        }
+        
+    }
+    //打开特定的avators
+    public void enableSpecificButtons(List<CardAvator> avators)
+    {
+        stopAllAvatorDraggable();
+        for (int i =0; i < avators.Count; i++)
+        {
+            avators[i].enableButton();
+        }
+        IsButtonsOnUse = true;
+        IsButtonClicked = false;
+    }
+
+    public void disableSpecificButtons(List<CardAvator> avators)
+    {
+        for (int i = 0; i < avators.Count; i++)
+        {
+            avators[i].disableButton();
         }
         UpdateShow();
     }
@@ -664,6 +751,36 @@ public class Areas : MonoBehaviour {
             if (areas[i].transform.childCount > 0 && areas[i].transform.GetChild(0).GetComponent<CardAvator>().isHero1 == isHero1)
             {
                 if (all || areas[i].transform.GetChild(0).GetComponent<CardAvator>().cardType == CardType.CharacterCard)
+                    outs.Add(areas[i].transform.GetChild(0).GetComponent<CardAvator>());
+            }
+
+        }
+        return outs;
+    }
+
+    public List<CardAvator> getAllActiveAvatorsOfBothHerosByType(CardType type = CardType.CharacterCard)
+    {
+        List<CardAvator> outs = new List<CardAvator>();
+        for (int i = 0; i < areas.Length; i++)
+        {
+            if (areas[i].transform.childCount > 0)
+            {
+                if (areas[i].transform.GetChild(0).GetComponent<CardAvator>().cardType == type)
+                    outs.Add(areas[i].transform.GetChild(0).GetComponent<CardAvator>());
+            }
+
+        }
+        return outs;
+    }
+
+    public List<CardAvator> findAvatorsBySkill(Skill skill)
+    {
+        List<CardAvator> outs = new List<CardAvator>();
+        for (int i = 0; i < areas.Length; i++)
+        {
+            if (areas[i].transform.childCount > 0)
+            {
+                if (areas[i].transform.GetChild(0).GetComponent<CardAvator>().hasSkill(skill))
                     outs.Add(areas[i].transform.GetChild(0).GetComponent<CardAvator>());
             }
 

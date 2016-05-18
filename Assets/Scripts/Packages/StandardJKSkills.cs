@@ -27,6 +27,18 @@ public class ParttimeJobSkill : Skill
         {
             if (thisCard.hasSkill(this) && thisCard.getMark("AkoDoCardIn") == null)
             {
+                List<CardAvator> lst = thisCard.getAreas().findAvatorsBySkill(this);
+                if (lst != null && lst.Count > 0)
+                {
+                    lst.Remove(thisCard);
+                    for (int i = 0; i < lst.Count; i++)
+                    {
+                        lst[i].addDamage(thisCard.damage - lst[i].damage);
+                        lst[i].playAnimation("majangPeng", 50);
+                    }
+                }
+                
+
                 //TODO
                 List<CardAvator> cards = thisCard.getAreas().getAllActiveAvatorsOfBothHerosByType();
                 if (cards.Contains(thisCard))
@@ -37,7 +49,9 @@ public class ParttimeJobSkill : Skill
                     return false;
                 thisCard.setMark("AkoDoCardIn", "standby");
                 thisCard.getHero().askForAvator(cards);
-            }else
+
+            }
+            else
             {
                 List<CardAvator>  lst = thisCard.getAreas().findAvatorsBySkill(this);
                 for (int i = 0; i < lst.Count; i++)

@@ -9,6 +9,10 @@ public class CardAvator : CardBase
     public int avatorId;
     public bool canDoMove = false;
     public bool canDoAttack = false;
+
+    public bool moved = false;
+    public bool attacked = false;
+
     public bool underdoBrainwashing = false;
 
     public bool canDirectlyAttackHero = false;
@@ -22,6 +26,9 @@ public class CardAvator : CardBase
     private TweenPosition avatorInTweenPosition;
     private TweenScale avatorInTweenScale;
 
+    private TweenPosition avatorEnlargeTweenPosition;
+    private TweenScale avatorEnlargeTweenScale;
+
     private UISprite sprite;
     private UILabel hpLabel;
     private UILabel damageLabel;
@@ -29,11 +36,17 @@ public class CardAvator : CardBase
     private SoundController soundController;
     private UISprite animatorSprite;
 
+    private UIButton avatorButton;
+    private DraggableAvator draggableAvator;
+
     void Awake()
     {
         avatorId = totalId;
         totalId += 1;
         sprite = this.GetComponent<UISprite>();
+        avatorButton = this.GetComponent<UIButton>();
+        avatorButton.enabled = false;
+        draggableAvator = this.GetComponent<DraggableAvator>();
         hpLabel = transform.Find("hp_num").GetComponent<UILabel>();
         damageLabel = transform.Find("damage_num").GetComponent<UILabel>();
         attackDistanceLabel = transform.Find("attackDistance_num").GetComponent<UILabel>();
@@ -43,6 +56,8 @@ public class CardAvator : CardBase
         attackTweenScale = GameObject.Find("AvatorAttack").GetComponent<TweenScale>();
         avatorInTweenPosition = GameObject.Find("AvatorIn").GetComponent<TweenPosition>();
         avatorInTweenScale = GameObject.Find("AvatorIn").GetComponent<TweenScale>();
+        avatorEnlargeTweenPosition = GameObject.Find("AvatorEnlarge").GetComponent<TweenPosition>();
+        avatorEnlargeTweenScale = GameObject.Find("AvatorEnlarge").GetComponent<TweenScale>();
         thisTweenPosition = this.GetComponent<TweenPosition>();
         thisTweenScale = this.GetComponent<TweenScale>();
     }
@@ -68,24 +83,35 @@ public class CardAvator : CardBase
 
     public void ResetShow()
     {//更新血量伤害的显示 更新sprite显示
+        this.avatorButton.enabled = false;
         this.GetComponent< UIWidget >().depth = 2;
+        this.GetComponent<UIWidget>().width = 80;
         damageLabel.text = damage + "";
         hpLabel.text = hp + "";
         attackDistanceLabel.text = attackDistance + "";
         this.GetComponent<UISprite>().spriteName = spriteName + "_avator";
+        if (!isHero1)
+        {
+            draggableAvator.enabled = false;
+        }
         if (!canDoAttack && !canDoMove)
         {
             this.GetComponent<UISprite>().color = new Color(0.5F, 0.5F, 0.5F);
+            draggableAvator.enabled = false;
         }
         else if (!canDoMove)
         {
             this.GetComponent<UISprite>().color = new Color(1F, 0.5F, 0.5F);
-        }else if (!canDoAttack)
+            draggableAvator.enabled = true;
+        }
+        else if (!canDoAttack)
         {
             this.GetComponent<UISprite>().color = new Color(0.5F, 1F, 1F);
+            draggableAvator.enabled = true;
         }else
         {
             this.GetComponent<UISprite>().color = new Color(1F, 1F, 1F);
+            draggableAvator.enabled = true;
         }
     }
 
@@ -115,6 +141,8 @@ public class CardAvator : CardBase
             canDoMove = false;
             canDoAttack = false;
         }
+        moved = false;
+        attacked = false;
         hasRush = card.hasRush;
         isHero1 = card.isHero1;
         if (!isHero1)
@@ -236,6 +264,19 @@ public class CardAvator : CardBase
         return false;
     }
 
+    public void changeMaxHp(int newMaxHp)
+    {
+        this.maxHp = newMaxHp;
+        if (this.hp > newMaxHp)
+        {
+            if (CardAvator.changeHp(new HpChangeStruct(this, newMaxHp - this.hp)))
+            {
+                kill(new DeathStruct(this, null));
+            }
+        }
+        ResetShow();
+    }
+
     public static bool changeHp(HpChangeStruct change)
     {
         //return true if hp <= 0
@@ -315,15 +356,19 @@ public class CardAvator : CardBase
         {
             for (int i = 0; i < lst.Count; i++)
             {
-                if (lst[i].canTrigger(death.card, (object)death, TriggerEvent.HpChanged))
+                if (lst[i].canTrigger(death.card, (object)death, TriggerEvent.OnDying))
                 {
-                    lst[i].OnTrigger(death.card, (object)death, TriggerEvent.HpChanged);
+                    lst[i].OnTrigger(death.card, (object)death, TriggerEvent.OnDying);
                 }
             }
         }
 
         GameObject.Find("GameController").GetComponent<GameController>().removeSkillsFromCard(death.card);
-        death.card.transform.parent.DestroyChildren();
+        if (death.card)
+        {
+            death.card.transform.parent.DestroyChildren();
+        }
+        
     }
 
     
@@ -331,6 +376,7 @@ public class CardAvator : CardBase
     private IEnumerator attackAnime(CardAvator card, bool can_counter = true) {
         //播放攻击动画
         this.GetComponent<UIWidget>().width = 80;
+        this.GetComponent<UIWidget>().depth = 99;
         this.ResetPos();
         setUpTween(attackTweenPosition, attackTweenScale);
         Vector3 toPos = card.transform.parent.localPosition - this.transform.parent.localPosition;
@@ -384,6 +430,8 @@ public class CardAvator : CardBase
     private IEnumerator attackBaseAnime()
     {
         //播放攻击动画
+        this.GetComponent<UIWidget>().width = 80;
+        this.GetComponent<UIWidget>().depth = 99;
         Transform toHero;
         if (this.isHero1)
         {
@@ -427,7 +475,7 @@ public class CardAvator : CardBase
         this.GetComponent<UIWidget>().depth = 99;
         thisTweenPosition.PlayForward();
         thisTweenScale.PlayForward();
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1.1f);
         thisTweenPosition.ResetToBeginning();
         thisTweenScale.ResetToBeginning();
         this.ResetPos();
@@ -479,6 +527,7 @@ public class CardAvator : CardBase
     public void addDamage(int num)
     {
         damage += num;
+        ResetShow();
     }
 
     public void loseDamage(int num)
@@ -488,16 +537,52 @@ public class CardAvator : CardBase
         {
             damage = 0;
         }
+        ResetShow();
     }
+
+    public Areas getAreas()
+    {
+        if (this.transform && this.transform.parent && this.transform.parent.parent && this.transform.parent.parent.name == "FightCard")
+        {
+            return this.transform.parent.parent.GetComponent<Areas>();
+        }
+        return null;
+    }
+
 
     public List<CardAvator> getEnemyCards(bool all = false)
     {
         return this.transform.parent.parent.GetComponent<Areas>().getAllActiveAvators(!this.isHero1, all);
     }
 
+    public CardAvator getRandomEnemyCard(bool all = false)
+    {
+        List<CardAvator> cards = getEnemyCards(all);
+        if (cards.Count > 0)
+            return cards[Random.Range(0, cards.Count)];
+        return null;
+    }
+
     public List<CardAvator> getSelfCards(bool all = false)
     {
         return this.transform.parent.parent.GetComponent<Areas>().getAllActiveAvators(this.isHero1, all);
+    }
+
+    public CardAvator getRandomSelfCard(bool all = false)
+    {
+        List<CardAvator> cards = getSelfCards(all);
+        if (cards.Count > 0)
+            return cards[Random.Range(0, cards.Count)];
+        return null;
+    }
+
+    public Hero getHero()
+    {
+        if (isHero1)
+        {
+            return GameObject.Find("hero1").GetComponent<Hero1>();
+        }
+        return GameObject.Find("hero2").GetComponent<Hero2>();
     }
 
     //UI
@@ -507,12 +592,11 @@ public class CardAvator : CardBase
     }
     
     //do animation, need to be added on the prefab of avator
-    private void playAnimation(string name,int frameRate)
+    public void playAnimation(string name,int frameRate)
     {
 
         animatorSprite.GetComponent<UISpriteAnimation>().enabled = true;
         GameObject atlas = Resources.Load<GameObject>("Effects/" + name);
-        MonoBehaviour.print(atlas);
         animatorSprite.atlas = atlas.GetComponent<UIAtlas>();
         animatorSprite.spriteName = animatorSprite.atlas.spriteList[0].name;
         animatorSprite.GetComponent<UISpriteAnimation>().framesPerSecond = frameRate;
@@ -543,4 +627,31 @@ public class CardAvator : CardBase
         thisTweenScale.ignoreTimeScale = ts.ignoreTimeScale;
         thisTweenScale.onFinished = ts.onFinished;
     }
+
+    //select avator as button mod
+    public void enableButton()
+    {
+        draggableAvator.enabled = false;
+        avatorButton.enabled = true;
+        this.GetComponent<UISprite>().color = new Color(1F, 1F, 0.7F);
+        setUpTween(avatorEnlargeTweenPosition, avatorEnlargeTweenScale);
+        thisTweenScale.PlayForward();
+    }
+
+    public void disableButton()
+    {
+        thisTweenScale.PlayReverse();
+        ResetPos();
+        ResetShow();
+    }
+    
+
+    public void onButtonClicked()
+    {
+        //should tell clicked
+        Areas.IsButtonClicked = true;
+        Areas.ClickedAvator = this;
+    }
+
+    
 }
