@@ -60,7 +60,7 @@ public class CardBase : MonoBehaviour
     public TypeCharacter typeCharacter;
     public TypeMove typeMove;
     public CardType cardType;
-    public List<Skill> skills;
+    public List<Skill> skills = new List<Skill>();
     public bool hasCharge = false;
     public bool hasRush = false;
     public Package package;
@@ -86,6 +86,10 @@ public class CardBase : MonoBehaviour
 
     public bool hasSkill(Skill skill)
     {
+        if (skills == null)
+        {
+            return false;
+        }
         return skills.Contains(skill);
     }
 }

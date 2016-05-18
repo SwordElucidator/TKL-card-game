@@ -19,6 +19,7 @@ public class GameController : MonoBehaviour {
     public Hero1 hero1;
     public Hero2 hero2;
     public static CardAvator FAKEAV = new CardAvator();
+    public static bool ONCHANGE = false;
 
     public Dictionary<CardAvator, List<Skill>> skillList = new Dictionary<CardAvator, List<Skill>>();
 
@@ -32,6 +33,8 @@ public class GameController : MonoBehaviour {
     private float wickropeLength;
     public bool isCurrentTurnHero1 = true;//当前回合英雄
     private CardGenerator cardGenerator;
+
+    public static bool triggerSkillDone = true;
 
     void Awake()
     {
@@ -61,34 +64,9 @@ public class GameController : MonoBehaviour {
             timer += Time.deltaTime;
             if (timer > cycleTime || endButton.clicked)
             {
+
                 //结束回合并进行下一个回合
-                soundController.clearWaitList();
-                endButton.clicked = false;
-                timer = 0;
-                wickropeSprite.width = 0;
-                disableAllPlayerMovement(isCurrentTurnHero1);
-
-                //应当结算currentHero所有牌的回合结算阶段
-                triggerTurnSkills(TriggerEvent.OnTurnEnd);
-
-                isCurrentTurnHero1 = !isCurrentTurnHero1;
-
-                //应当结算currentHero所有牌的回合开始阶段
-                triggerTurnSkills(TriggerEvent.OnTurnStart);
-
-                enableAllPlayerMovement(isCurrentTurnHero1);
-                //给一张牌
-
-                //AI模式
-                if (!isCurrentTurnHero1)
-                {
-                    StartCoroutine(GenerateCardForHero2());
-                    StartCoroutine(EnemyAITurn());
-                }else
-                {
-                    StartCoroutine(GenerateCardForHero1());
-                    endButton.enableButton();
-                }
+                StartCoroutine(doTurnChange());
             }
             else if (cycleTime - timer <= 15f)//如果当前时间小于15s
             {
@@ -98,7 +76,55 @@ public class GameController : MonoBehaviour {
         }
     }
 
-    public void triggerTurnSkills(TriggerEvent e)
+    private IEnumerator doTurnChange()
+    {
+        //结束回合并进行下一个回合
+        ONCHANGE = true;
+        soundController.clearWaitList();
+        endButton.clicked = false;
+        timer = 0;
+        wickropeSprite.width = 0;
+        disableAllPlayerMovement(isCurrentTurnHero1);
+
+
+        //应当结算currentHero所有牌的回合结算阶段
+        while (!triggerSkillDone)
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+        triggerSkillDone = false;
+        StartCoroutine(triggerTurnSkills(TriggerEvent.OnTurnEnd));
+        while (!triggerSkillDone)
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+        isCurrentTurnHero1 = !isCurrentTurnHero1;
+        triggerSkillDone = false;
+        //应当结算currentHero所有牌的回合开始阶段
+        StartCoroutine(triggerTurnSkills(TriggerEvent.OnTurnStart));
+        while (!triggerSkillDone)
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+        enableAllPlayerMovement(isCurrentTurnHero1);
+
+        //给一张牌
+
+        //AI模式
+        if (!isCurrentTurnHero1)
+        {
+            StartCoroutine(GenerateCardForHero2());
+            StartCoroutine(EnemyAITurn());
+        }
+        else
+        {
+            StartCoroutine(GenerateCardForHero1());
+            endButton.enableButton();
+        }
+        ONCHANGE = false;
+    }
+
+    public IEnumerator triggerTurnSkills(TriggerEvent e)
     {
         CardAvator[] validcas = skillList.Keys.ToArray();
         for (int j = 0; j < validcas.Length; j++)
@@ -111,20 +137,44 @@ public class GameController : MonoBehaviour {
                     if (lst[i].canTrigger(validcas[j], (object)isCurrentTurnHero1, e))
                     {
                         lst[i].OnTrigger(validcas[j], (object)isCurrentTurnHero1, e);
+                        yield return new WaitForSeconds(lst[i].yieldtime);
                     }
                 }
             }
         }
+        triggerSkillDone = true;
     }
 
 
     public void addSkillsFromCard(CardAvator card)
     {
         skillList.Add(card, card.skills);
+        if (card.skills == null)
+        {
+            return;
+        }
+        for (int i = 0; i < card.skills.Count; i++)
+        {
+            if (card.skills[i].global)
+            {
+                skillList[FAKEAV].Add(card.skills[i]);
+            }
+        }
     }
 
     public bool removeSkillsFromCard(CardAvator card)
     {
+        if (card.skills != null)
+        {
+            for (int i = 0; i < card.skills.Count; i++)
+            {
+                if (card.skills[i].global)
+                {
+                    skillList[FAKEAV].Remove(card.skills[i]);
+                }
+            }
+        }
+        
         if (skillList.ContainsKey(card))
         {
             return skillList.Remove(card);
@@ -136,6 +186,7 @@ public class GameController : MonoBehaviour {
         
     }
 
+    //每一个相同的技能应当只被调用一次，也就是如果多个牌需要调用相同函数的时候，这个函数应当可以被应用于所有的技能拥有者
     public List<Skill> getSkillsOn(TriggerEvent e, CardAvator card = null)
     {
         List<Skill> list = new List<Skill>();
@@ -143,17 +194,18 @@ public class GameController : MonoBehaviour {
         {
             for (int i =0; i < skillList[card].Count; i++)
             {
-                list.Add(skillList[card][i]);
-            }
-        }else
-        {
-            //-1 means global checking skills  TODO
-            for (int i = 0; i < skillList[FAKEAV].Count; i++)
-            {
-                list.Add(skillList[FAKEAV][i]);
+                if (skillList[card][i].events.Contains(e))
+                    list.Add(skillList[card][i]);
             }
         }
-        return list;
+        //null means global checking skills  TODO
+        for (int i = 0; i < skillList[FAKEAV].Count; i++)
+        {
+            if (skillList[FAKEAV][i].events.Contains(e))
+                list.Add(skillList[FAKEAV][i]);
+        }
+        
+        return list.Distinct().ToList();
     }
 
     private void disableAllPlayerMovement(bool isHero1 = true)

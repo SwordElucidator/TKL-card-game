@@ -9,5 +9,6 @@ public class Hero2 : Hero {
     {
         heroName = PlayerPrefs.GetString("hero2");
         sprite.spriteName = "home_" + heroName;
+        isHero1 = false;
     }
 }

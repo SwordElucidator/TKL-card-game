@@ -30,7 +30,8 @@ public class SeikanhikouSkill : Skill
             List<CardAvator> cards = thisCard.getEnemyCards();
             for (int i = 0; i < cards.Count; i++)
             {
-                cards[i].doBrainwashing();
+                if (cards[i].typeCharacter != TypeCharacter.Tekketsu)
+                    cards[i].doBrainwashing();
             }
             //舰载机，等会写
         }
@@ -70,6 +71,41 @@ public class DiamondCrevasseSkill : Skill
                 cards[i].doMotivate(0, 1);
             }
             //舰载机，等会写
+        }
+        return false;
+    }
+
+}
+
+public class NiconiconiSkill : Skill
+{
+    public NiconiconiSkill()
+    {
+        this.name = "Niconiconi";
+        this.chineseName = "妮可妮可妮";
+        this.events.Add(TriggerEvent.OnTurnEnd);
+    }
+
+    public override bool canTrigger(CardAvator thisCard, object data, TriggerEvent e)
+    {
+        if (e == TriggerEvent.OnTurnEnd)
+        {
+            if (thisCard.hasSkill(this) && (bool)data == thisCard.isHero1 && (!thisCard.attacked && !thisCard.moved) && thisCard.getRandomEnemyCard())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public override bool OnTrigger(CardAvator thisCard, object data, TriggerEvent e)
+    {
+        if (e == TriggerEvent.OnTurnEnd)
+        {
+            CardAvator enemy = thisCard.getRandomEnemyCard();
+            if (enemy)
+                thisCard.getRandomEnemyCard().doBrainwashing();
+            
         }
         return false;
     }

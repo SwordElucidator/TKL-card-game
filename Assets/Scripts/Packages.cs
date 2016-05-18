@@ -22,8 +22,6 @@ public class Packages {
             return;
         StandardPackage standard = new StandardPackage();
         loadPackage(standard);
-        MonoBehaviour.print(allCards.Count);
-        MonoBehaviour.print(allPackages.Count);
         distributeCardsToHero();
         created = true;
     }

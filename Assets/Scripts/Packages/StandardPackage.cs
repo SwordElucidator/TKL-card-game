@@ -35,6 +35,7 @@ public class StandardPackage : Package {
     private void addDivasCards()
     {
         CardFile Nico = CardFile.makeCardFile(this, 6, 2, 8, 1, "矢泽妮可", "Divas", "Nico", TypeAge.Otome, TypeCharacter.BlackBelly, TypeMove.Walk);
+        Nico.addSkill(new NiconiconiSkill());
         CardFile Ranka = CardFile.makeCardFile(this, 7, 1, 9, 1, "兰花·李", "Divas", "Ranka", TypeAge.One, TypeCharacter.Hero, TypeMove.Walk);
         Ranka.addSkill(new SeikanhikouSkill());
         CardFile Sheryl = CardFile.makeCardFile(this, 7, 2, 5, 1, "雪露·诺姆", "Divas", "Sheryl", TypeAge.Loli, TypeCharacter.Queen, TypeMove.Walk);
@@ -46,8 +47,10 @@ public class StandardPackage : Package {
     private void addJKCards()
     {
         CardFile Ako = CardFile.makeCardFile(this, 3, 0, 4, 1, "新子憧", "JK", "Ako", TypeAge.Otome, TypeCharacter.Enkou, TypeMove.Walk);
+        Ako.addSkill(new ParttimeJobSkill());
         CardFile Kotonoha = CardFile.makeCardFile(this, 4, 4, 4, 1, "桂言叶", "JK", "Kotonoha", TypeAge.Otome, TypeCharacter.Yandere, TypeMove.Walk, true, true);
         CardFile Shana = CardFile.makeCardFile(this, 5, 3, 6, 1, "夏娜", "JK", "Shana", TypeAge.Loli, TypeCharacter.Tsundere, TypeMove.Fly, true);
+        Shana.addSkill(new AlastorSkill());
         cards.Add(Ako);
         cards.Add(Kotonoha);
         cards.Add(Shana);

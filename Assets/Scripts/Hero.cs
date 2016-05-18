@@ -1,8 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Hero : MonoBehaviour
 {
+    public bool isHero1 = true;
+
     public static string[] HeroNames = {
         "Touhou",
         "Kancolle",
@@ -52,6 +55,16 @@ public class Hero : MonoBehaviour
         }
     }
 
+    public void changeMaxHp(int newMax)
+    {
+        maxHp = newMax;
+        if (hpCount > maxHp)
+        {
+            hpCount = maxHp;
+            hpLabel.text = hpCount + "";
+        }
+    }
+
     public void Heal(int hp)
     {
         hpCount += hp;
@@ -60,5 +73,53 @@ public class Hero : MonoBehaviour
             hpCount = maxHp;
         }
         hpLabel.text = hpCount + "";
+    }
+
+    public Areas getAreas()
+    {
+        return GameObject.Find("FightCard").GetComponent<Areas>();
+    }
+
+    public MyCard getMyCard()
+    {
+        if (isHero1)
+        {
+            return GameObject.Find("My Card").GetComponent<MyCard>();
+        }else
+        {
+            return GameObject.Find("Enemy Card").GetComponent<MyCard>();
+        }
+    }
+
+    public void askForAvator(List<CardAvator> avators)
+    {
+        if (Areas.IsButtonsOnUse || avators.Count == 0)
+        {
+            return;
+        }
+        GameController.triggerSkillDone = false;
+        getAreas().enableSpecificButtons(avators);
+        getMyCard().changeAllCardsStatus(false);
+        StartCoroutine(waitForButtonClicked(avators));
+
+    }
+
+    private IEnumerator waitForButtonClicked(List<CardAvator> avators)
+    {
+        while (!Areas.IsButtonClicked)
+        {
+            if (GameController.ONCHANGE)
+            {
+                Areas.ClickedAvator = avators[Random.Range(0, avators.Count)];
+                break;
+            }
+            yield return new WaitForSeconds(0.1f);
+        }
+        Areas.IsButtonClicked = false;
+        Areas.IsButtonsOnUse = false;
+
+        getAreas().disableSpecificButtons(avators);
+        getMyCard().changeAllCardsStatus(GameObject.Find("GameController").GetComponent<GameController>().isCurrentTurnHero1);
+        GameController.triggerSkillDone = true;
     }
 }
