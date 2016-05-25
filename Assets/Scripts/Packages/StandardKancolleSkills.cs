@@ -57,6 +57,7 @@ public class ReconnaissanceSkill : Skill
                 }
                 else
                 {
+                    //目标是其他
                     List<CardAvator> lst = thisCard.getAreas().findAvatorsBySkill(this);
                     for (int i = 0; i < lst.Count; i++)
                     {
@@ -83,6 +84,60 @@ public class ReconnaissanceSkill : Skill
             }
             
         }
+        return false;
+    }
+}
+
+//Yuudachi
+public class TotsugekiSkill : Skill
+{
+    public TotsugekiSkill()
+    {
+        this.name = "Totsugeki";
+        this.chineseName = "突击";
+        this.events.Add(TriggerEvent.CardAttacked);
+    }
+
+    public override bool canTrigger(CardAvator thisCard, object data, TriggerEvent e)
+    {
+        if (e == TriggerEvent.CardAttacked)
+        {
+            AttackStruct attStruct = (AttackStruct)data;
+            if (thisCard.hasSkill(this) && attStruct.fromCard == thisCard && attStruct.fromCard.hp <= 0)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public override bool OnTrigger(CardAvator thisCard, object data, TriggerEvent e)
+    {
+        if (e == TriggerEvent.CardAttacked)
+        {
+            AttackStruct attStruct = (AttackStruct)data;
+            if (thisCard.getCardOn(Direct.Top) && thisCard.getCardOn(Direct.Top).isHero1 != thisCard.isHero1 && thisCard.getCardOn(Direct.Top).cardType == CardType.CharacterCard)
+            {
+                if (thisCard.getCardOn(Direct.Top) != attStruct.toCard || attStruct.toCard.hp > 0)
+                    thisCard.getCardOn(Direct.Top).doKill(false, 1.5f);
+            }
+            if (thisCard.getCardOn(Direct.Bottom) && thisCard.getCardOn(Direct.Bottom).isHero1 != thisCard.isHero1 && thisCard.getCardOn(Direct.Bottom).cardType == CardType.CharacterCard)
+            {
+                if (thisCard.getCardOn(Direct.Bottom) != attStruct.toCard || attStruct.toCard.hp > 0)
+                    thisCard.getCardOn(Direct.Bottom).doKill(false, 1.5f);
+            }
+            if (thisCard.getCardOn(Direct.Left) && thisCard.getCardOn(Direct.Left).isHero1 != thisCard.isHero1 && thisCard.getCardOn(Direct.Left).cardType == CardType.CharacterCard)
+            {
+                if (thisCard.getCardOn(Direct.Left) != attStruct.toCard || attStruct.toCard.hp > 0)
+                    thisCard.getCardOn(Direct.Left).doKill(false, 1.5f);
+            }
+            if (thisCard.getCardOn(Direct.Right) && thisCard.getCardOn(Direct.Right).isHero1 != thisCard.isHero1 && thisCard.getCardOn(Direct.Right).cardType == CardType.CharacterCard)
+            {
+                if (thisCard.getCardOn(Direct.Right) != attStruct.toCard || attStruct.toCard.hp > 0)
+                    thisCard.getCardOn(Direct.Right).doKill(false, 1.5f);
+            }
+        }
+        
         return false;
     }
 }

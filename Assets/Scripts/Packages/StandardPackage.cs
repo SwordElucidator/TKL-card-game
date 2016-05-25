@@ -26,6 +26,7 @@ public class StandardPackage : Package {
     private void addKancolleCards()
     {
         CardFile Yuudachi = CardFile.makeCardFile(this, 4, 3, 5, 1, "夕立", "Kancolle", "Yuudachi", TypeAge.Loli, TypeCharacter.Kuchiku, TypeMove.Sail);
+        Yuudachi.addSkill(new TotsugekiSkill());
         CardFile Kaga = CardFile.makeCardFile(this, 7, 0, 9, 0, "加贺", "Kancolle", "Kaga", TypeAge.One, TypeCharacter.Wife, TypeMove.Sail);
         CardFile Akatsuki = CardFile.makeCardFile(this, 3, 2, 4, 1, "晓", "Kancolle", "Akatsuki", TypeAge.Loli, TypeCharacter.Genki, TypeMove.Sail);
         Akatsuki.addSkill(new ReconnaissanceSkill());

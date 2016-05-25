@@ -402,7 +402,7 @@ public class CardAvator : CardBase
 
     public static void kill(DeathStruct death)
     {
-        //TODO 播放死亡动画之类的
+        //这个函数只是触发一下kill的事件，需要真的杀死的话请call dokill
         //trigger HpChanged
         List<Skill> lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.OnDying, death.card);
         if (lst.Count > 0)
@@ -416,22 +416,27 @@ public class CardAvator : CardBase
             }
         }
 
-        GameObject.Find("GameController").GetComponent<GameController>().removeSkillsFromCard(death.card);
+        
 
         
     }
 
-    public void doKill()
+    public void doKill(bool isAttack = true, float waitTime = 0f)
     {
-        StartCoroutine(killAnime());
+        StartCoroutine(killAnime(isAttack, waitTime));
     }
 
-    private IEnumerator killAnime()
+    private IEnumerator killAnime(bool isAttack, float waitTime = 0f)
     {
+        yield return new WaitForSeconds(waitTime);
         this.shake(0.2f, 0.03f);
         yield return new WaitForSeconds(0.2f);
+        GameObject.Find("GameController").GetComponent<GameController>().removeSkillsFromCard(this);
         this.transform.parent.DestroyChildren();
-        GameController.eventTriggering = false;
+        if (isAttack)
+        {
+            GameController.eventTriggering = false;
+        }
     }
 
 
