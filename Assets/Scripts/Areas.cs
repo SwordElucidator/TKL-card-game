@@ -148,6 +148,8 @@ public class Areas : MonoBehaviour {
         //加入到技能列表中
         GameObject.Find("GameController").GetComponent<GameController>().addSkillsFromCard(avator.GetComponent<CardAvator>());
 
+        
+
         //进去的时候call的方法
         List<Skill> lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.CardIn, avator.GetComponent<CardAvator>());
         if (lst.Count > 0)
@@ -156,13 +158,19 @@ public class Areas : MonoBehaviour {
             {
                 if (lst[i].canTrigger(avator.GetComponent<CardAvator>(), null, TriggerEvent.CardIn))
                 {
-                    lst[i].OnTrigger(avator.GetComponent<CardAvator>(), null, TriggerEvent.CardIn);
-                    area.transform.parent.GetComponent<Areas>().StartCoroutine(lst[i].waitForResult(avator.GetComponent<CardAvator>(), null, TriggerEvent.CardIn));
+                    GameController.skillEventsQueue.Enqueue(new NextEvent(new OneSkill(lst[i], avator.GetComponent<CardAvator>(), null, TriggerEvent.CardIn)));
+                    //lst[i].OnTrigger(avator.GetComponent<CardAvator>(), null, TriggerEvent.CardIn);
+                    //area.transform.parent.GetComponent<Areas>().StartCoroutine(lst[i].waitForResult(avator.GetComponent<CardAvator>(), null, TriggerEvent.CardIn));
                 }
             }
         }
+
+        //结束set的全部工作 因为之上的doSet之类的并不改变各项属性，可以直接令方法被调用了。
+        GameController.eventTriggering = false;
+
         card.transform.parent.GetComponent<MyCard>().LoseCard(card.gameObject);
         //area.transform.parent.GetComponent<Areas>().UpdateShow();
+        
     }
 
     public static bool CanSet(Card card, GameObject area, bool is_hero1 = true)
@@ -223,7 +231,17 @@ public class Areas : MonoBehaviour {
         {
             card.canDoAttack = false;
         }
-        area.transform.parent.GetComponent<Areas>().UpdateShow();
+        card.ResetArea();
+        card.ResetShow();
+        if (old)
+        {
+            old.GetComponent<CardAvator>().ResetArea();
+            old.GetComponent<CardAvator>().ResetShow();
+        }
+        
+        card.moveWait();
+
+        //area.transform.parent.GetComponent<Areas>().UpdateShow();
 
     }
 
@@ -280,7 +298,7 @@ public class Areas : MonoBehaviour {
         {
             case TypeMove.Fly:
                 //不能交换
-                if (area.transform.childCount > 0)
+                if (area.transform.childCount > 0 && area.transform.GetChild(0).GetComponent<CardAvator>().hp > 0)
                 {
                     return false;
                 }
@@ -289,7 +307,7 @@ public class Areas : MonoBehaviour {
                 return dis.getAbsoluteDistance() <= 2 && dis.getAbsoluteDistance() > 0;
             case TypeMove.Sail:
                 //不能交换
-                if (area.transform.childCount > 0)
+                if (area.transform.childCount > 0 && area.transform.GetChild(0).GetComponent<CardAvator>().hp > 0)
                 {
                     return false;
                 }
@@ -301,7 +319,7 @@ public class Areas : MonoBehaviour {
                 return Math.Abs(dis2.x) == 1 || (dis2.y <= 3 && dis2.y > 0);
             case TypeMove.Walk:
                 //不能交换敌方
-                if (area.transform.childCount > 0)
+                if (area.transform.childCount > 0 && area.transform.GetChild(0).GetComponent<CardAvator>().hp > 0)
                 {
                     if (area.transform.GetChild(0).GetComponent<CardAvator>().isHero1 != card.isHero1)
                     {
@@ -409,7 +427,7 @@ public class Areas : MonoBehaviour {
             return false;
         }
 
-        if (area.transform.childCount == 0 || area.transform.GetChild(0).GetComponent<CardAvator>().isHero1 == card.isHero1) {
+        if (area.transform.childCount == 0 || area.transform.GetChild(0).GetComponent<CardAvator>().isHero1 == card.isHero1 || area.transform.GetChild(0).GetComponent<CardAvator>().hp <= 0) {
             return false;
         }
 
@@ -442,9 +460,9 @@ public class Areas : MonoBehaviour {
     {
         if (isHero1)
         {
-            return GameObject.Find("hero1").GetComponent<Hero1>();
+            return GameObject.Find("hero1").GetComponent<Hero>();
         }
-        return GameObject.Find("hero2").GetComponent<Hero2>();
+        return GameObject.Find("hero2").GetComponent<Hero>();
     }
 
     public List<CardAvator> getNearbyAvators(CardAvator card)
@@ -600,10 +618,9 @@ public class Areas : MonoBehaviour {
             //若有卡牌被移动，则回复到原来的位置
             if (areas[i].transform.childCount > 0)
             {
-                Vector3 toPosition = areas[i].transform.position;
-                iTween.MoveTo(areas[i].transform.GetChild(0).gameObject, toPosition, 0.5f);
-                areas[i].transform.GetChild(0).GetComponent<UISprite>().width = 80;
-                areas[i].transform.GetChild(0).GetComponent<UIWidget>().depth = 2;
+                //Vector3 toPosition = areas[i].transform.position;
+                //iTween.MoveTo(areas[i].transform.GetChild(0).gameObject, toPosition, 0.5f);
+                areas[i].transform.GetChild(0).GetComponent<CardAvator>().ResetArea();
                 areas[i].transform.GetChild(0).GetComponent<CardAvator>().ResetPos();
                 areas[i].transform.GetChild(0).GetComponent<CardAvator>().ResetShow();
 

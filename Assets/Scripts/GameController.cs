@@ -16,10 +16,17 @@ public class GameController : MonoBehaviour {
     public MyCard enemyCard;
     public Areas areas;
     public EndButton endButton;
-    public Hero1 hero1;
-    public Hero2 hero2;
+    public Hero hero1;
+    public Hero hero2;
     public static CardAvator FAKEAV = new CardAvator();
     public static bool ONCHANGE = false;
+
+
+    public static Queue<NextEvent> skillEventsQueue = new Queue<NextEvent>();
+    public static bool eventTriggering = false;
+
+    public bool animateTriggering = false;
+
 
     public Dictionary<CardAvator, List<Skill>> skillList = new Dictionary<CardAvator, List<Skill>>();
 
@@ -52,6 +59,9 @@ public class GameController : MonoBehaviour {
         //给另一个英雄发起始牌
         StartCoroutine(GenerateCardForHero2(3));
         gamestate = GameState.PlayCard;
+
+        skillEventsQueue = new Queue<NextEvent>();
+        StartCoroutine(generalEventHandler());
     }
 
 
@@ -73,6 +83,37 @@ public class GameController : MonoBehaviour {
                 //显示绳子动画
                 wickropeSprite.width = (int)((cycleTime - timer) / 15f * wickropeLength);
             }
+        }
+    }
+
+    private IEnumerator generalEventHandler()
+    {
+        while (true)
+        {
+            if (eventTriggering)
+            {
+                //执行当前的event中
+
+            }else
+            {
+                if (skillEventsQueue.Count > 0)
+                {
+                    //从当前的queue中获得一个并执行
+                    NextEvent ne = skillEventsQueue.Dequeue();
+                    eventTriggering = true;
+                    if (ne.isSkill)
+                    {
+                        ne.oneSkill.trigger();
+                        ne.oneSkill.waitForResult();
+                    }
+                    else
+                    {
+                        ne.oneCall.Call();
+                    }
+                }
+                
+            }
+            yield return new WaitForSeconds(0.1f);
         }
     }
 
@@ -190,7 +231,12 @@ public class GameController : MonoBehaviour {
     public List<Skill> getSkillsOn(TriggerEvent e, CardAvator card = null)
     {
         List<Skill> list = new List<Skill>();
-        if (card && skillList[card] != null)
+
+        if (card && !skillList.ContainsKey(card))
+        {
+            MonoBehaviour.print("ALERT: " + card.cardName + "is not in skillList for some reason!");
+        }
+        if (card && skillList.ContainsKey(card) && skillList[card] != null)
         {
             for (int i =0; i < skillList[card].Count; i++)
             {

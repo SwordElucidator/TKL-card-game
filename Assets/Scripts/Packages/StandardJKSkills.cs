@@ -46,7 +46,10 @@ public class ParttimeJobSkill : Skill
                     cards.Remove(thisCard);
                 }
                 if (cards.Count == 0)
+                {
                     return false;
+                }
+                    
                 thisCard.setMark("AkoDoCardIn", "standby");
                 thisCard.getHero().askForAvator(cards);
 
@@ -78,9 +81,14 @@ public class ParttimeJobSkill : Skill
             int value = thisCard.hp - Areas.ClickedAvator.hp;
             CardAvator.changeHp(new HpChangeStruct(thisCard, -value));
             thisCard.playAnimation("changeHp", 30);
-            CardAvator.changeHp(new HpChangeStruct(Areas.ClickedAvator, value));
+            CardAvator.changeHp(new HpChangeStruct(Areas.ClickedAvator, value), true);
             Areas.ClickedAvator.playAnimation("changeHp", 30);
-        }   
+            //每个waitForResult必须定义eventTrigger的结束时间
+            GameController.eventTriggering = false;
+        }else
+        {
+            GameController.eventTriggering = false;
+        }
     }
 }
 

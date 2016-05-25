@@ -19,7 +19,8 @@ public class DragableCard : UIDragDropItem {
         if (surface != null && Areas.CanSet(this.GetComponent<Card>(), surface))
         {
             //拖拽倒了可发牌的某个区域
-            Areas.Set(this.GetComponent<Card>(), surface);
+           GameController.skillEventsQueue.Enqueue(new NextEvent(new OneCall(this.gameObject, surface, Calls.CallSetEvent)));
+           //Areas.Set(this.GetComponent<Card>(), surface);
         }
         else
         {

@@ -6,6 +6,8 @@ public class Hero : MonoBehaviour
 {
     public bool isHero1 = true;
 
+    public string heroName;
+
     public static string[] HeroNames = {
         "Touhou",
         "Kancolle",
@@ -25,7 +27,10 @@ public class Hero : MonoBehaviour
 
     protected UISprite sprite;
     private UILabel hpLabel;
-    private int hpCount = 30;
+    public int hpCount = 30;
+
+    private UISprite animatorSprite;
+
     //test function
     void Update()
     {
@@ -43,6 +48,48 @@ public class Hero : MonoBehaviour
     {
         sprite = this.GetComponent<UISprite>();
         hpLabel = this.transform.Find("hp").GetComponent<UILabel>();
+        animatorSprite = this.transform.Find("animator").GetComponent<UISprite>();
+    }
+
+    
+
+    void Start()
+    {
+        heroName = PlayerPrefs.GetString(this.gameObject.name);
+        sprite.spriteName = "home_" + heroName;
+    }
+
+    public void playAnimation(string name, int frameRate)
+    {
+
+        animatorSprite.GetComponent<UISpriteAnimation>().enabled = true;
+        GameObject atlas = Resources.Load<GameObject>("Effects/" + name);
+        animatorSprite.atlas = atlas.GetComponent<UIAtlas>();
+        animatorSprite.spriteName = animatorSprite.atlas.spriteList[0].name;
+        animatorSprite.GetComponent<UISpriteAnimation>().framesPerSecond = frameRate;
+        animatorSprite.GetComponent<UISpriteAnimation>().RebuildSpriteList();
+        animatorSprite.GetComponent<UISpriteAnimation>().ResetToBeginning();
+        animatorSprite.GetComponent<UISpriteAnimation>().Play();
+    }
+
+    public void playGameover()
+    {
+
+        StartCoroutine(gameOverAnimation());
+    }
+
+    private IEnumerator gameOverAnimation()
+    {
+        this.shake(2f, 0.04f);
+        yield return new WaitForSeconds(2f);
+        GameObject.Destroy(this.gameObject);
+        //TODO animation
+        GameObject.Find("GameController").GetComponent<GameController>().returnToMainPage();
+    }
+
+    public void Reset()
+    {
+        hpLabel.text = hpCount + "";
     }
 
     public void TakeDamage(int damage)
@@ -121,5 +168,11 @@ public class Hero : MonoBehaviour
         getAreas().disableSpecificButtons(avators);
         getMyCard().changeAllCardsStatus(GameObject.Find("GameController").GetComponent<GameController>().isCurrentTurnHero1);
         GameController.triggerSkillDone = true;
+    }
+
+
+    public void shake(float time, float ratio)
+    {
+        iTween.ShakePosition(this.gameObject, new Vector3(ratio, ratio, 0), time);
     }
 }

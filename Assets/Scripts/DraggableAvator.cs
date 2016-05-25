@@ -6,6 +6,8 @@ public class DraggableAvator : UIDragDropItem
     
     protected override void OnDragDropRelease(GameObject surface)
     {
+        this.GetComponent<CardAvator>().ResetSize();
+        this.GetComponent<CardAvator>().onHold -= 1;
         bool updated = false;
         if (this.transform.parent.parent.name != "FightCard")
         {
@@ -23,7 +25,7 @@ public class DraggableAvator : UIDragDropItem
         {
             if (Areas.CanAttackBase(this.GetComponent<CardAvator>(), surface))
             {
-                Areas.AttackBase(this.GetComponent<CardAvator>(), surface);
+                GameController.skillEventsQueue.Enqueue(new NextEvent(new OneCall(this.gameObject, surface, Calls.CallAttackBaseEvent)));
                 updated = true;
             }
         }else
@@ -36,12 +38,13 @@ public class DraggableAvator : UIDragDropItem
 
             if (surface != null && Areas.CanAttack(this.GetComponent<CardAvator>(), surface))
             {
-                Areas.Attack(this.GetComponent<CardAvator>(), surface);
+                GameController.skillEventsQueue.Enqueue(new NextEvent(new OneCall(this.gameObject, surface, Calls.CallAttackEvent)));
                 updated = true;
             }
             else if (surface != null && Areas.CanMove(this.GetComponent<CardAvator>(), surface))
             {
-                Areas.Move(this.GetComponent<CardAvator>(), surface);
+                GameController.skillEventsQueue.Enqueue(new NextEvent(new OneCall(this.gameObject, surface, Calls.CallMoveEvent)));
+                updated = true;
             }
         }
         //attack这种需要播放动画的类型会自行updateshow
@@ -81,6 +84,7 @@ public class DraggableAvator : UIDragDropItem
         
 
         base.OnDragDropStart();
+        this.GetComponent<CardAvator>().onHold += 1;
         this.GetComponent<CardAvator>().PlaySound("attack");
         this.GetComponent<UIWidget>().width = 100;
         this.GetComponent<UIWidget>().depth = 100;

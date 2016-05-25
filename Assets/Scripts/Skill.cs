@@ -154,6 +154,7 @@ public class Skill  {
 
     public virtual IEnumerator waitForResult(CardAvator thisCard, object data, TriggerEvent e)
     {
+        GameController.eventTriggering = false;
         yield return null;
     }
 
