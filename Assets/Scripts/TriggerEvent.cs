@@ -92,6 +92,11 @@ public class OneSkill
         thisCard.StartCoroutine(skill.waitForResult(thisCard, data, e));
     }
 
+    public float getYieldTime()
+    {
+        return skill.yieldtime;
+    }
+
     public OneSkill(Skill skill, CardAvator thisCard, object data, TriggerEvent e)
     {
         this.skill = skill;

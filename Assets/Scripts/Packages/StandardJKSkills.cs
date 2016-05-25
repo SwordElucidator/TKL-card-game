@@ -79,7 +79,7 @@ public class ParttimeJobSkill : Skill
             }
             yield return new WaitForSeconds(0.1f);
             int value = thisCard.hp - Areas.ClickedAvator.hp;
-            CardAvator.changeHp(new HpChangeStruct(thisCard, -value));
+            CardAvator.changeHp(new HpChangeStruct(thisCard, -value), true);
             thisCard.playAnimation("changeHp", 30);
             CardAvator.changeHp(new HpChangeStruct(Areas.ClickedAvator, value), true);
             Areas.ClickedAvator.playAnimation("changeHp", 30);
@@ -121,7 +121,7 @@ public class AlastorSkill : Skill
             for (int i = 0; i < cards.Count; i++)
             {
                 cards[i].changeMaxHp(cards[i].maxHp / 2);
-                cards[i].playAnimation("fire", 40);
+                cards[i].playAnimation("fire", 40, 1.5f);
 
             }
             if (thisCard.getAreas().isHeroNearby(thisCard, !thisCard.isHero1))
@@ -132,5 +132,6 @@ public class AlastorSkill : Skill
         }
         return false;
     }
+
 
 }

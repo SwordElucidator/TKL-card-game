@@ -144,7 +144,6 @@ public class Hero : MonoBehaviour
         {
             return;
         }
-        GameController.triggerSkillDone = false;
         getAreas().enableSpecificButtons(avators);
         getMyCard().changeAllCardsStatus(false);
         StartCoroutine(waitForButtonClicked(avators));
@@ -167,7 +166,6 @@ public class Hero : MonoBehaviour
 
         getAreas().disableSpecificButtons(avators);
         getMyCard().changeAllCardsStatus(GameObject.Find("GameController").GetComponent<GameController>().isCurrentTurnHero1);
-        GameController.triggerSkillDone = true;
     }
 
 

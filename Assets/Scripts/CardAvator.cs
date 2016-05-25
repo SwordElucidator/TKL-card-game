@@ -711,9 +711,15 @@ public class CardAvator : CardBase
     }
     
     //do animation, need to be added on the prefab of avator
-    public void playAnimation(string name,int frameRate)
+    public void playAnimation(string name,int frameRate, float waitTime = 0)
     {
 
+        StartCoroutine(animeIE(name, frameRate, waitTime));
+    }
+
+    private IEnumerator animeIE(string name, int frameRate, float waitTime = 0)
+    {
+        yield return new WaitForSeconds(waitTime);
         animatorSprite.GetComponent<UISpriteAnimation>().enabled = true;
         GameObject atlas = Resources.Load<GameObject>("Effects/" + name);
         animatorSprite.atlas = atlas.GetComponent<UIAtlas>();

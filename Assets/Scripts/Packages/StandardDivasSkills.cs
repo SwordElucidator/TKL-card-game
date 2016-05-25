@@ -9,6 +9,7 @@ public class SeikanhikouSkill : Skill
         this.name = "Seikanhikou";
         this.chineseName = "星间飞行";
         this.events.Add(TriggerEvent.CardIn);
+        this.yieldtime = 0.5f;
     }
 
     public override bool canTrigger(CardAvator thisCard, object data, TriggerEvent e)
@@ -47,6 +48,7 @@ public class DiamondCrevasseSkill : Skill
         this.name = "DiamondCrevasse";
         this.chineseName = "钻石裂痕";
         this.events.Add(TriggerEvent.OnTurnStart);
+        this.yieldtime = 1f;
     }
 
     public override bool canTrigger(CardAvator thisCard, object data, TriggerEvent e)
@@ -84,6 +86,7 @@ public class NiconiconiSkill : Skill
         this.name = "Niconiconi";
         this.chineseName = "妮可妮可妮";
         this.events.Add(TriggerEvent.OnTurnEnd);
+        this.yieldtime = 1f;
     }
 
     public override bool canTrigger(CardAvator thisCard, object data, TriggerEvent e)

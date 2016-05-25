@@ -105,6 +105,8 @@ public class GameController : MonoBehaviour {
                     {
                         ne.oneSkill.trigger();
                         ne.oneSkill.waitForResult();
+
+                        yield return new WaitForSeconds(ne.oneSkill.getYieldTime());
                     }
                     else
                     {
@@ -129,21 +131,21 @@ public class GameController : MonoBehaviour {
 
 
         //应当结算currentHero所有牌的回合结算阶段
-        while (!triggerSkillDone)
+        while (eventTriggering || skillEventsQueue.Count > 0)
         {
             yield return new WaitForSeconds(0.1f);
         }
         triggerSkillDone = false;
-        StartCoroutine(triggerTurnSkills(TriggerEvent.OnTurnEnd));
-        while (!triggerSkillDone)
+        triggerTurnSkills(TriggerEvent.OnTurnEnd);
+        while ( eventTriggering || skillEventsQueue.Count > 0)
         {
             yield return new WaitForSeconds(0.1f);
         }
         isCurrentTurnHero1 = !isCurrentTurnHero1;
         triggerSkillDone = false;
         //应当结算currentHero所有牌的回合开始阶段
-        StartCoroutine(triggerTurnSkills(TriggerEvent.OnTurnStart));
-        while (!triggerSkillDone)
+        triggerTurnSkills(TriggerEvent.OnTurnStart);
+        while (eventTriggering || skillEventsQueue.Count > 0)
         {
             yield return new WaitForSeconds(0.1f);
         }
@@ -165,7 +167,7 @@ public class GameController : MonoBehaviour {
         ONCHANGE = false;
     }
 
-    public IEnumerator triggerTurnSkills(TriggerEvent e)
+    public void triggerTurnSkills(TriggerEvent e)
     {
         CardAvator[] validcas = skillList.Keys.ToArray();
         for (int j = 0; j < validcas.Length; j++)
@@ -177,8 +179,7 @@ public class GameController : MonoBehaviour {
                 {
                     if (lst[i].canTrigger(validcas[j], (object)isCurrentTurnHero1, e))
                     {
-                        lst[i].OnTrigger(validcas[j], (object)isCurrentTurnHero1, e);
-                        yield return new WaitForSeconds(lst[i].yieldtime);
+                        GameController.skillEventsQueue.Enqueue(new NextEvent(new OneSkill(lst[i], validcas[j], isCurrentTurnHero1, e)));
                     }
                 }
             }

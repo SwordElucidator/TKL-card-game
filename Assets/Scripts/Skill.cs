@@ -138,7 +138,7 @@ public class DeathStruct
 public class Skill  {
     public string name;
     public string chineseName;
-    public float yieldtime = 1f;
+    public float yieldtime = 0f;
     public List<TriggerEvent> events = new List<TriggerEvent>();
     public bool global = false;
 
@@ -154,8 +154,8 @@ public class Skill  {
 
     public virtual IEnumerator waitForResult(CardAvator thisCard, object data, TriggerEvent e)
     {
+        yield return new WaitForSeconds(yieldtime);
         GameController.eventTriggering = false;
-        yield return null;
     }
 
 
