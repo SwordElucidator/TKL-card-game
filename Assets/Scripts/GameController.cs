@@ -135,14 +135,12 @@ public class GameController : MonoBehaviour {
         {
             yield return new WaitForSeconds(0.1f);
         }
-        triggerSkillDone = false;
         triggerTurnSkills(TriggerEvent.OnTurnEnd);
         while ( eventTriggering || skillEventsQueue.Count > 0)
         {
             yield return new WaitForSeconds(0.1f);
         }
         isCurrentTurnHero1 = !isCurrentTurnHero1;
-        triggerSkillDone = false;
         //应当结算currentHero所有牌的回合开始阶段
         triggerTurnSkills(TriggerEvent.OnTurnStart);
         while (eventTriggering || skillEventsQueue.Count > 0)
@@ -184,7 +182,6 @@ public class GameController : MonoBehaviour {
                 }
             }
         }
-        triggerSkillDone = true;
     }
 
 

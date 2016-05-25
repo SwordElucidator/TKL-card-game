@@ -28,16 +28,16 @@ public class MiraieigouzanSkill : Skill
     {
         this.name = "Miraieigouzan";
         this.chineseName = "未来永劫斩";
-        this.events.Add(TriggerEvent.CardAttacked);
+        this.events.Add(TriggerEvent.Damage);
         this.events.Add(TriggerEvent.CardPreAttack);
     }
 
     public override bool canTrigger(CardAvator thisCard, object data, TriggerEvent e)
     {
-        if (e == TriggerEvent.CardAttacked)
+        if (e == TriggerEvent.Damage)
         {
-            AttackStruct attStruct = (AttackStruct)data;
-            if (thisCard.hasSkill(this) && attStruct.fromCard == thisCard)
+            DamageStruct damStruct = (DamageStruct)data;
+            if (thisCard.hasSkill(this) && damStruct.fromCard == thisCard)
             {
                 return true;
             }
@@ -54,14 +54,14 @@ public class MiraieigouzanSkill : Skill
 
     public override bool OnTrigger(CardAvator thisCard, object data, TriggerEvent e)
     {
-        if (e == TriggerEvent.CardAttacked)
+        if (e == TriggerEvent.Damage)
         {
-            AttackStruct attStruct = (AttackStruct)data;
-            if (thisCard.hasSkill(this) && attStruct.fromCard == thisCard)
+            DamageStruct damStruct = (DamageStruct)data;
+            if (thisCard.hasSkill(this) && damStruct.fromCard == thisCard)
             {
-                if (attStruct.toCard)
+                if (damStruct.toCard)
                 {
-                    attStruct.toCard.setMark("MiraiMark" + thisCard.avatorId, "avaliable");
+                    damStruct.toCard.setMark("MiraiMark" + thisCard.avatorId, "avaliable");
                 }
                 else
                 {
@@ -71,11 +71,19 @@ public class MiraieigouzanSkill : Skill
         }
         else if (e == TriggerEvent.CardPreAttack)
         {
-            CardAvator enemy = (CardAvator)data;
-            if (thisCard.hasSkill(this))
+            GameObject go = (GameObject)data;
+            CardAvator enemy = go.GetComponent<CardAvator>();
+            if (enemy)
             {
-                return enemy.getMark("MiraiMark" + thisCard.avatorId) != null && enemy.getMark("MiraiMark" + thisCard.avatorId) == "avaliable";
+                if (thisCard.hasSkill(this))
+                {
+                    return enemy.getMark("MiraiMark" + thisCard.avatorId) != null && enemy.getMark("MiraiMark" + thisCard.avatorId) == "avaliable";
+                }
+            }else
+            {
+                //用canDirectlyAttackHero handle过了，注意沉默
             }
+
         }
         return false;
     }

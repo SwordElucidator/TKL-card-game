@@ -793,5 +793,10 @@ public class CardAvator : CardBase
         Areas.ClickedAvator = this;
     }
 
+    public CardAvator getCardOn(Direct dir)
+    {
+        return this.transform.parent.parent.GetComponent<Areas>().cardOn(this, dir);
+    }
+
     
 }

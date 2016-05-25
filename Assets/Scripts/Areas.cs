@@ -3,6 +3,14 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 
+public enum Direct
+{
+    Left,
+    Right,
+    Top,
+    Bottom
+}
+
 public class IntVector2
 {
     public int x;
@@ -233,10 +241,12 @@ public class Areas : MonoBehaviour {
         }
         card.ResetArea();
         card.ResetShow();
+        card.ResetPos();
         if (old)
         {
             old.GetComponent<CardAvator>().ResetArea();
             old.GetComponent<CardAvator>().ResetShow();
+            old.GetComponent<CardAvator>().ResetPos();
         }
         
         card.moveWait();
@@ -438,10 +448,10 @@ public class Areas : MonoBehaviour {
         {
             for (int i = 0; i < lst.Count; i++)
             {
-                if (lst[i].canTrigger(card, (object)area.transform.GetChild(0).GetComponent<CardAvator>(), TriggerEvent.CardPreAttack))
+                if (lst[i].canTrigger(card, (object)area.transform.GetChild(0).gameObject, TriggerEvent.CardPreAttack))
                 {
                     //返回true说明这个技能允许跨距离打击
-                    if (lst[i].OnTrigger(card, (object)area.transform.GetChild(0).GetComponent<CardAvator>(), TriggerEvent.CardPreAttack))
+                    if (lst[i].OnTrigger(card, (object)area.transform.GetChild(0).gameObject, TriggerEvent.CardPreAttack))
                     {
                         return true;
                     }
@@ -581,6 +591,25 @@ public class Areas : MonoBehaviour {
         {
             return true;
         }
+
+        //如果有技能的情况
+        //Trigger CardPreAttack Skills
+        List<Skill> lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.CardPreAttack, card);
+        if (lst.Count > 0)
+        {
+            for (int i = 0; i < lst.Count; i++)
+            {
+                if (lst[i].canTrigger(card, (object)area, TriggerEvent.CardPreAttack))
+                {
+                    //返回true说明这个技能允许跨距离打击
+                    if (lst[i].OnTrigger(card, (object)area, TriggerEvent.CardPreAttack))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
         if (area.name == "hero1")
         {
             IntVector2 dis3 = IntVector2.getDisplacement(new IntVector2(current_area), Hero1vec1);
@@ -605,6 +634,58 @@ public class Areas : MonoBehaviour {
     {
         return IntVector2.getDisplacement(new IntVector2(area1), new IntVector2(area2));
     }
+
+    public static int getAbsoluteDistance(GameObject area1, GameObject area2)
+    {
+        return IntVector2.getAbsoluteDistance(new IntVector2(area1), new IntVector2(area2));
+    }
+
+    public CardAvator getCardById(int id)
+    {
+        Transform area = this.transform.Find("area" + id);
+        if (area && area.childCount > 0)
+        {
+            return area.GetChild(0).GetComponent<CardAvator>();
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public CardAvator cardOn(CardAvator card, Direct dir)
+    {
+        int id = getID(card.transform.parent.gameObject);
+        switch (dir)
+        {
+            case Direct.Top:
+                if (id < 8)
+                {
+                    return null;
+                }
+                return getCardById(id - 8);
+            case Direct.Bottom:
+                if (id > 23)
+                {
+                    return null;
+                }
+                return getCardById(id + 8);
+            case Direct.Left:
+                if (id % 8 == 0)
+                {
+                    return null;
+                }
+                return getCardById(id - 1);
+            case Direct.Right:
+                if (id % 8 == 7)
+                {
+                    return null;
+                }
+                return getCardById(id + 1);
+        }
+        return null;
+    }
+
     //获得area的ID
     public static int getID(GameObject area)
     {

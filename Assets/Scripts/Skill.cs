@@ -27,7 +27,7 @@ public enum TriggerEvent
     CardMoved,
     //结算新的可攻击格子  DONE
     CardPreAttack,
-    //准备攻击时   结算出手时的技能（比如精准射击之类的，能够破除对方的烟之类的）  DONE
+    //准备攻击时   结算出手时的技能（比如精准射击之类的，能够破除对方的烟之类的）  DONE    接受一个gameObject data，可以代表卡牌或者英雄
     CardOnAttack,
     //造成伤害前  结算造成或受到攻击前的技能（比如拉烟，无敌，减伤之类的）  DONE
     OnDamage,
@@ -37,7 +37,7 @@ public enum TriggerEvent
     Damage,
     //受到伤害后  结算造成或受到攻击时的技能（比如激怒之类的）  DONE
     Damaged,
-    //攻击完成时  结算攻击完成时的技能，比如未来永劫斩给人上标记  DONE
+    //主动攻击完成时   DONE
     CardAttacked,
     //HP变化时  DONE
     OnHpChange,
