@@ -16,7 +16,16 @@ public class BGMController : MonoBehaviour {
             MonoBehaviour.print("No BGMLoader Found, it must be from the first scene");
         }
         loader = GameObject.Find("BGMScript").GetComponent<BGMLoader>();
-        switch (this.GetComponent<GameController>().hero1.heroName)
+        string heroname = "";
+        if (PlayerPrefs.GetInt("isClientHero1") == 1)
+        {
+            heroname = PlayerPrefs.GetString("hero1"); 
+        }
+        else
+        {
+            heroname = PlayerPrefs.GetString("hero2");
+        }
+        switch (heroname)
         {
             case "Touhou":
                 current_bgms = loader.TH_BGMs;

@@ -7,7 +7,7 @@ public class DragableCard : UIDragDropItem {
 
     protected override void OnDragDropRelease(GameObject surface)
     {
-        if (this.transform.parent.name != "My Card")
+        if (!this.transform.parent.GetComponent<MyCard>())
         {
             return;
         }
@@ -30,7 +30,7 @@ public class DragableCard : UIDragDropItem {
 
     protected override void OnDragDropStart()
     {
-        if (this.transform.parent.name != "My Card")
+        if (!this.transform.parent.GetComponent<MyCard>())
         {
             return;
         }

@@ -12,8 +12,8 @@ public enum GameState
 
 public class GameController : MonoBehaviour {
     public GameState gamestate = GameState.CardGenerating;
-    public MyCard myCard;
-    public MyCard enemyCard;
+    public MyCard myCard1;
+    public MyCard myCard2;
     public Areas areas;
     public EndButton endButton;
     public Hero hero1;
@@ -45,23 +45,50 @@ public class GameController : MonoBehaviour {
 
     void Awake()
     {
+        if (PlayerPrefs.GetInt("isClientHero1") == 0)
+        {
+            MyCard mc = myCard1;
+            this.myCard1 = myCard2;
+            this.myCard2 = mc;
+        }
+
+        Client.isClientHero1 = PlayerPrefs.GetInt("isClientHero1") == 1;
         skillList = new Dictionary<CardAvator, List<Skill>>();
         skillList[FAKEAV] = new List<Skill>();
         wickropeSprite = this.transform.Find("wickrope").GetComponent<UISprite>();
         wickropeLength = wickropeSprite.width;
         wickropeSprite.width = 0;
         soundController = GameObject.Find("FightCard").GetComponent<SoundController>();
+
+        skillEventsQueue = new Queue<NextEvent>();
+        StartCoroutine(generalEventHandler());
+
+
+
         this.cardGenerator = this.GetComponent<CardGenerator>();
         //命令cardGenerator制作卡牌
         this.cardGenerator.generateCardsForCurrentPlayers(PlayerPrefs.GetString("hero1"), PlayerPrefs.GetString("hero2"));
         //给当前回合的英雄发起始牌 默认是hero1
         StartCoroutine(GenerateCardForHero1(3));
         //给另一个英雄发起始牌
-        StartCoroutine(GenerateCardForHero2(3));
+        StartCoroutine(GenerateCardForHero2(4));
+        //第一回合应当默认为hero1开始，无论玩家是hero1还是hero2
+        isCurrentTurnHero1 = true;
+        //应当让另外一个人的所有活动停止 TODO 无法顺利停止
+        disableAllPlayerMovement(!isCurrentTurnHero1);
+        //应当允许当前hero1的所有行动
+        enableAllPlayerMovement(isCurrentTurnHero1);
+
         gamestate = GameState.PlayCard;
 
-        skillEventsQueue = new Queue<NextEvent>();
-        StartCoroutine(generalEventHandler());
+        //如果第一个回合时玩家不是hero1，那么应当由hero1的AI来执行。
+        if (!Client.isClientHero1)
+        {
+            StartCoroutine(EnemyAITurn(2));
+        }
+
+
+
     }
 
 
@@ -154,13 +181,22 @@ public class GameController : MonoBehaviour {
         //AI模式
         if (!isCurrentTurnHero1)
         {
+            //Hero2的turn
             StartCoroutine(GenerateCardForHero2());
-            StartCoroutine(EnemyAITurn());
+            //如果用户是hero1，那么因为现在回合是hero2的turn也就是说要搞AI
+            if (Client.isClientHero1)
+                StartCoroutine(EnemyAITurn());
+            else //如果用户是hero2，那么是正常的turn
+                endButton.enableButton();
         }
         else
         {
+            //hero1的turn，类似的逻辑
             StartCoroutine(GenerateCardForHero1());
-            endButton.enableButton();
+            if (Client.isClientHero1)
+                endButton.enableButton();
+            else
+                StartCoroutine(EnemyAITurn());
         }
         ONCHANGE = false;
     }
@@ -255,12 +291,13 @@ public class GameController : MonoBehaviour {
     private void disableAllPlayerMovement(bool isHero1 = true)
     {
         areas.changeAllAvatorsStatus(false, isHero1);
+        //欲关掉所有的player movement的话，  比如要关掉的牌是hero1的话，那么应当关掉所有相应的mycard1的操作，因为mycard1是hero1的mycard
         if (isHero1)
         {
-            myCard.changeAllCardsStatus(false);
+            myCard1.changeAllCardsStatus(false);
         }else
         {
-            enemyCard.changeAllCardsStatus(false);
+            myCard2.changeAllCardsStatus(false);
         }
     }
 
@@ -269,11 +306,11 @@ public class GameController : MonoBehaviour {
         areas.changeAllAvatorsStatus(true, isHero1);
         if (isHero1)
         {
-            myCard.changeAllCardsStatus(true);
+            myCard1.changeAllCardsStatus(true);
         }
         else
         {
-            enemyCard.changeAllCardsStatus(true);
+            myCard2.changeAllCardsStatus(true);
         }
     }
 
@@ -283,10 +320,11 @@ public class GameController : MonoBehaviour {
         {
             GameObject cardGo = cardGenerator.RandomGenerateCard();//调用方法随即生成一个卡牌//要等两秒
             yield return new WaitForSeconds(0.5f);
-            //放入mycard
-            myCard.AddCard(cardGo);
+            //放入mycard  为hero1生成的牌应当放在mycard1中
+            myCard1.AddCard(cardGo);
+
         }
-        myCard.UpdateShow();
+        myCard1.UpdateShow();
     }
 
     private IEnumerator GenerateCardForHero2(int num = 1)
@@ -296,23 +334,35 @@ public class GameController : MonoBehaviour {
             GameObject cardGo = cardGenerator.RandomGenerateCard(false);//调用方法随即生成一个卡牌//要等两秒
             yield return new WaitForSeconds(0.5f);
             //放入mycard
-            enemyCard.AddCard(cardGo);
+            myCard2.AddCard(cardGo);
         }
-        myCard.UpdateShow();
+        myCard2.UpdateShow();
     }
 
 
-    private IEnumerator EnemyAITurn()
+    private IEnumerator EnemyAITurn(float extreWait = 0f)
     {
+        yield return new WaitForSeconds(extreWait);
         yield return new WaitForSeconds(1f);
-        //TODO 测试用，给hero2的牌扔到场上
+        //TODO 测试用，给enemy的牌扔到场上，不一定是hero2
         System.Random rnd = new System.Random();
-        var numbers = Enumerable.Range(0, 16).OrderBy(r => rnd.Next()).ToArray();
-        for (int i = 0; i < 16; i++)
+        var numbers = Enumerable.Range(0, 32).OrderBy(r => rnd.Next()).ToArray();
+        //如果玩家是hero1，那么敌人是mycard2
+        MyCard m;
+        if (Client.isClientHero1)
         {
-            if (enemyCard.hasCardLeft() && Areas.CanSet(enemyCard.getRandomCard().GetComponent<Card>(), areas.getArea(numbers[i]), false))
+            m = myCard2;
+        }
+        else
+        {
+            m = myCard1;
+        }
+         
+        for (int i = 0; i < 32; i++)
+        {
+            if (m.hasCardLeft() && Areas.CanSet(m.getRandomCard().GetComponent<Card>(), areas.getArea(numbers[i])))
             {
-                Areas.Set(enemyCard.getRandomCard().GetComponent<Card>(), areas.getArea(numbers[i]));
+                Areas.Set(m.getRandomCard().GetComponent<Card>(), areas.getArea(numbers[i]));
                 yield return new WaitForSeconds(1f);
             }
         }

@@ -82,45 +82,90 @@ public class Areas : MonoBehaviour {
         Vector3 width = area2_transform.position - area1_transform.position;
         Vector3 height = area3_transform.position - area1_transform.position;
 
-        for (int i = 0; i < 8; i++)
+        if (PlayerPrefs.GetInt("isClientHero1") == 1)
         {
-            GameObject area = NGUITools.AddChild(this.gameObject, areaPrefeb);
-            area.GetComponent<Transform>().position = area1_transform.position + i * width;
-            area.name = "area" + i;
-            area.tag = presetTag(i);
-            area.GetComponent<UIWidget>().depth = 1;
-            areas[i] = area;
-        }
+            for (int i = 0; i < 8; i++)
+            {
+                GameObject area = NGUITools.AddChild(this.gameObject, areaPrefeb);
+                area.GetComponent<Transform>().position = area1_transform.position + i * width;
+                area.name = "area" + i;
+                area.tag = presetTag(i);
+                area.GetComponent<UIWidget>().depth = 1;
+                areas[i] = area;
+            }
 
-        for (int i = 0; i < 8; i++)
-        {
-            GameObject area = NGUITools.AddChild(this.gameObject, areaPrefeb);
-            area.GetComponent<Transform>().position = area3_transform.position + i * width;
-            area.name = "area" + (i + 8);
-            area.tag = presetTag(i);
-            area.GetComponent<UIWidget>().depth = 1;
-            areas[i + 8] = area;
-        }
+            for (int i = 0; i < 8; i++)
+            {
+                GameObject area = NGUITools.AddChild(this.gameObject, areaPrefeb);
+                area.GetComponent<Transform>().position = area3_transform.position + i * width;
+                area.name = "area" + (i + 8);
+                area.tag = presetTag(i);
+                area.GetComponent<UIWidget>().depth = 1;
+                areas[i + 8] = area;
+            }
 
-        for (int i = 0; i < 8; i++)
-        {
-            GameObject area = NGUITools.AddChild(this.gameObject, areaPrefeb);
-            area.GetComponent<Transform>().position = area4_transform.position + i * width;
-            area.name = "area" + (i + 16);
-            area.tag = presetTag(i);
-            area.GetComponent<UIWidget>().depth = 1;
-            areas[i + 16] = area;
-        }
+            for (int i = 0; i < 8; i++)
+            {
+                GameObject area = NGUITools.AddChild(this.gameObject, areaPrefeb);
+                area.GetComponent<Transform>().position = area4_transform.position + i * width;
+                area.name = "area" + (i + 16);
+                area.tag = presetTag(i);
+                area.GetComponent<UIWidget>().depth = 1;
+                areas[i + 16] = area;
+            }
 
-        for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 8; i++)
+            {
+                GameObject area = NGUITools.AddChild(this.gameObject, areaPrefeb);
+                area.GetComponent<Transform>().position = area4_transform.position + height + i * width;
+                area.name = "area" + (i + 24);
+                area.tag = presetTag(i);
+                area.GetComponent<UIWidget>().depth = 1;
+                areas[i + 24] = area;
+            }
+        }else
         {
-            GameObject area = NGUITools.AddChild(this.gameObject, areaPrefeb);
-            area.GetComponent<Transform>().position = area4_transform.position + height + i * width;
-            area.name = "area" + (i + 24);
-            area.tag = presetTag(i);
-            area.GetComponent<UIWidget>().depth = 1;
-            areas[i + 24] = area;
+            for (int i = 0; i < 8; i++)
+            {
+                GameObject area = NGUITools.AddChild(this.gameObject, areaPrefeb);
+                area.GetComponent<Transform>().position = area1_transform.position + i * width;
+                area.name = "area" + (31 - i);
+                area.tag = presetTag(31 - i);
+                area.GetComponent<UIWidget>().depth = 1;
+                areas[i] = area;
+            }
+
+            for (int i = 0; i < 8; i++)
+            {
+                GameObject area = NGUITools.AddChild(this.gameObject, areaPrefeb);
+                area.GetComponent<Transform>().position = area3_transform.position + i * width;
+                area.name = "area" + (23 - i);
+                area.tag = presetTag(23 - i);
+                area.GetComponent<UIWidget>().depth = 1;
+                areas[i + 8] = area;
+            }
+
+            for (int i = 0; i < 8; i++)
+            {
+                GameObject area = NGUITools.AddChild(this.gameObject, areaPrefeb);
+                area.GetComponent<Transform>().position = area4_transform.position + i * width;
+                area.name = "area" + (15 - i);
+                area.tag = presetTag(15 - i);
+                area.GetComponent<UIWidget>().depth = 1;
+                areas[i + 16] = area;
+            }
+
+            for (int i = 0; i < 8; i++)
+            {
+                GameObject area = NGUITools.AddChild(this.gameObject, areaPrefeb);
+                area.GetComponent<Transform>().position = area4_transform.position + height + i * width;
+                area.name = "area" + (7 - i);
+                area.tag = presetTag(7 - i);
+                area.GetComponent<UIWidget>().depth = 1;
+                areas[i + 24] = area;
+            }
         }
+        
 
     }
 
@@ -181,7 +226,7 @@ public class Areas : MonoBehaviour {
         
     }
 
-    public static bool CanSet(Card card, GameObject area, bool is_hero1 = true)
+    public static bool CanSet(Card card, GameObject area)
     {
         //TODO
         //保证gameobject是个area
@@ -196,9 +241,9 @@ public class Areas : MonoBehaviour {
         {
             return false;
         }
-        if (is_hero1 && getID(area) < 16)
+        if (card.isHero1 && getID(area) < 16)
             return false;
-        if (!is_hero1 && getID(area) > 15)
+        if (!card.isHero1 && getID(area) > 15)
             return false;
         //如果类型是CharacterCard那么就要自己这边的两排
         if (card.cardType == CardType.CharacterCard)
@@ -255,7 +300,7 @@ public class Areas : MonoBehaviour {
 
     }
 
-    public static bool CanMove(CardAvator card, GameObject area, bool is_hero1 = true)
+    public static bool CanMove(CardAvator card, GameObject area)
     {
         //TODO
         GameObject current_area = card.GetComponentInParent<Transform>().parent.gameObject;
@@ -324,7 +369,7 @@ public class Areas : MonoBehaviour {
                 IntVector2 dis2 = getDisplacement(current_area, area);
                 if (!dis2.onSameLine())
                     return false;
-                if (is_hero1)
+                if (card.isHero1)
                     return Math.Abs(dis2.x) == 1 || (dis2.y >= -3 && dis2.y < 0);
                 return Math.Abs(dis2.x) == 1 || (dis2.y <= 3 && dis2.y > 0);
             case TypeMove.Walk:
@@ -510,7 +555,7 @@ public class Areas : MonoBehaviour {
         if (area.name != "hero1" && area.name != "hero2")
             return;
 
-        if ((area.name == "hero1") == card.isHero1)
+        if (area.GetComponent<Hero>().isHero1 == card.isHero1)
         {
             return;
         }
@@ -519,7 +564,7 @@ public class Areas : MonoBehaviour {
             return;
         }
 
-        AttackStruct attStruct = new AttackStruct(card, null, card.isHero1, area.name == "hero1");
+        AttackStruct attStruct = new AttackStruct(card, null, card.isHero1, area.GetComponent<Hero>().isHero1);
 
         //这里应该结算正要attack的情形，这里如果被终止的话有时会触发attack结算完毕的事件，需要技能本身来定义
         //如果有技能的情况
@@ -578,7 +623,7 @@ public class Areas : MonoBehaviour {
         if (area.name != "hero1" && area.name != "hero2")
             return false;
 
-        if ((area.name == "hero1") == card.isHero1)
+        if ((area.GetComponent<Hero>().isHero1) == card.isHero1)
         {
             return false;
         }

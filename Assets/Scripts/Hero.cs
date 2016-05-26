@@ -46,16 +46,34 @@ public class Hero : MonoBehaviour
 
     void Awake()
     {
+        //如果并非是正确的hero1和hero2的位置的话，应当调整这俩的名字
+        if (PlayerPrefs.GetInt("isClientHero1") == 0)
+        {
+            if (this.gameObject.name == "hero1")
+            {
+                this.gameObject.name = "hero2";
+            }else if (this.gameObject.name == "hero2")
+            {
+                this.gameObject.name = "hero1";
+            }
+        }
         sprite = this.GetComponent<UISprite>();
         hpLabel = this.transform.Find("hp").GetComponent<UILabel>();
         animatorSprite = this.transform.Find("animator").GetComponent<UISprite>();
+        if (this.gameObject.name == "hero1")
+        {
+            isHero1 = true;
+        }else if (this.gameObject.name == "hero2")
+        {
+            isHero1 = false;
+        }
     }
 
     
 
     void Start()
     {
-        heroName = PlayerPrefs.GetString(this.gameObject.name);
+        heroName = PlayerPrefs.GetString(isHero1 ? "hero1" : "hero2");
         sprite.spriteName = "home_" + heroName;
     }
 
@@ -131,10 +149,10 @@ public class Hero : MonoBehaviour
     {
         if (isHero1)
         {
-            return GameObject.Find("My Card").GetComponent<MyCard>();
+            return GameObject.Find("mycard1").GetComponent<MyCard>();
         }else
         {
-            return GameObject.Find("Enemy Card").GetComponent<MyCard>();
+            return GameObject.Find("mycard2").GetComponent<MyCard>();
         }
     }
 

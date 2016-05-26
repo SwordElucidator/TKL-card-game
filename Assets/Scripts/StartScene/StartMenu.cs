@@ -185,18 +185,32 @@ public class StartMenu : MonoBehaviour {
         int herotype2 = Random.Range(1, 4);
         string hero2Name = "hero" + herotype2;
 
-        VSShow._instance.Show(hero1Name, hero2Name);
+        
 
         //set playerprefs 传输给scene play
         //应该传送的是hero的name而不是1,2,3,4
 
-        PlayerPrefs.SetString("hero1", Hero.HeroNames[herotype1 - 1]);
-        PlayerPrefs.SetString("hero2", Hero.HeroNames[herotype2 - 1]);
-        //设置卡组
+        
+
+        int isClientHero1 = Random.Range(0, 2);
+        PlayerPrefs.SetInt("isClientHero1", isClientHero1);
+        if (isClientHero1 == 1)
+        {
+            PlayerPrefs.SetString("hero1", Hero.HeroNames[herotype1 - 1]);
+            PlayerPrefs.SetString("hero2", Hero.HeroNames[herotype2 - 1]);
+            VSShow._instance.Show(hero1Name, hero2Name);
+        }
+        else
+        {
+            PlayerPrefs.SetString("hero2", Hero.HeroNames[herotype1 - 1]);
+            PlayerPrefs.SetString("hero1", Hero.HeroNames[herotype2 - 1]);
+            VSShow._instance.Show(hero2Name, hero1Name);
+        }
+       //设置卡组
 
 
 
-        StartCoroutine(LoadPlayScene());
+       StartCoroutine(LoadPlayScene());
     }
 
     

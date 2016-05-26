@@ -102,7 +102,8 @@ public class CardAvator : CardBase
         attackDistanceLabel.text = attackDistance + "";
         this.GetComponent<UISprite>().spriteName = spriteName + "_avator";
 
-        if (!isHero1)
+        //不允许拽的条件是如果不是当前玩家的牌的话  也就是 当前玩家isHero1 != 这张卡isHero1
+        if (Client.isClientHero1 != isHero1)
         {
             draggableAvator.enabled = false;
         }
@@ -180,7 +181,8 @@ public class CardAvator : CardBase
         attacked = false;
         hasRush = card.hasRush;
         isHero1 = card.isHero1;
-        if (!isHero1)
+        //需要反面的条件同上，如果当前角色不拥有这张牌
+        if (Client.isClientHero1 != isHero1)
         {
             this.GetComponent<UISprite>().flip = UIBasicSprite.Flip.Both;
         }
@@ -314,6 +316,7 @@ public class CardAvator : CardBase
             if (CardAvator.changeHp(new HpChangeStruct(this, newMaxHp - this.hp)))
             {
                 kill(new DeathStruct(this, null));
+                doKill(false,0.3f);
             }
         }
         ResetShow();
@@ -632,6 +635,7 @@ public class CardAvator : CardBase
         playAnimation("brain", 40);
         if (changeHp(new HpChangeStruct(this, -1))){
             kill(new DeathStruct(this, null));
+            doKill(false, 0.8f);
         }
         loseDamage(1);
         ResetShow();
@@ -643,6 +647,7 @@ public class CardAvator : CardBase
         if (changeHp(new HpChangeStruct(this, hp)))
         {
             kill(new DeathStruct(this, null));
+            doKill(false, 0.8f);
         }
         addDamage(1);
         ResetShow();
@@ -673,7 +678,7 @@ public class CardAvator : CardBase
         return null;
     }
 
-
+    //all代表的是包括角色牌以外的牌。 如果是false则只返回角色牌
     public List<CardAvator> getEnemyCards(bool all = false)
     {
         return this.transform.parent.parent.GetComponent<Areas>().getAllActiveAvators(!this.isHero1, all);

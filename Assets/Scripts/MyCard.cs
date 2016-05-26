@@ -9,13 +9,38 @@ public class MyCard : MonoBehaviour {
     public Transform card02;
     public bool isHero1 = true;
 
+    public bool locked = false;
+
     private int startDepth = 9;
     private float xOffset;
     private List<GameObject> cards = new List<GameObject>();
 
+    void Awake()
+    {
+        //如果并非是正确的hero1和hero2的位置的话，应当调整这俩的名字
+        if (PlayerPrefs.GetInt("isClientHero1") == 0)
+        {
+            if (this.gameObject.name == "mycard1")
+            {
+                this.gameObject.name = "mycard2";
+            }
+            else if (this.gameObject.name == "mycard2")
+            {
+                this.gameObject.name = "mycard1";
+            }
+        }
+    }
 
     void Start()
     {
+        if (this.gameObject.name == "mycard1")
+        {
+            isHero1 = true;
+        }
+        else if (this.gameObject.name == "mycard2")
+        {
+            isHero1 = false;
+        }
         xOffset = card02.position.x - card01.position.x;
     }
 
@@ -58,6 +83,12 @@ public class MyCard : MonoBehaviour {
         cards.Add(go);
 
         go.GetComponent<Card>().SetDepth(startDepth + 2*(cards.Count - 1));
+
+        if (locked)
+        {
+            go.GetComponent<Card>().canDoSet = false;
+            go.GetComponent<DragableCard>().enabled = false;
+        }
     }
 
     public void LoseCard(GameObject cardGo = null)
@@ -107,6 +138,7 @@ public class MyCard : MonoBehaviour {
 
     public void changeAllCardsStatus(bool isEnable)
     {
+        locked = !isEnable;
         for (int i = 0; i < cards.Count; i++)
         {
             cards[i].GetComponent<Card>().canDoSet = isEnable;

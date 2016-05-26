@@ -75,7 +75,7 @@ public class ReconnaissanceSkill : Skill
                     List<CardAvator> lst = thisCard.getAreas().findAvatorsBySkill(this);
                     for (int i = 0; i < lst.Count; i++)
                     {
-                        if (lst[i].getAreas().isHeroNearby(lst[i], hero.isHero1))
+                        if (lst[i].getAreas().isHeroNearby(lst[i], hero.isHero1) && hero.isHero1 != lst[i].isHero1)
                         {
                             return true;
                         }

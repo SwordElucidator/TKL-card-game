@@ -13,10 +13,6 @@ public class DraggableAvator : UIDragDropItem
         {
             return;
         }
-        if (this.transform.parent.parent.parent.FindChild("My Card").GetComponent<MyCard>().isHero1 != this.GetComponent<CardAvator>().isHero1)
-        {
-            return;
-        }
 
         base.OnDragDropRelease(surface);
         this.transform.parent.parent.GetComponent<Areas>().inlightenMap();
