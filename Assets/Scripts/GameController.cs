@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
+using UnityEngine.Networking;
 
 public enum GameState
 {
@@ -10,7 +11,8 @@ public enum GameState
     End//游戏结束阶段
 }
 
-public class GameController : MonoBehaviour {
+public class GameController :  MonoBehaviour{
+
     public GameState gamestate = GameState.CardGenerating;
     public MyCard myCard1;
     public MyCard myCard2;
@@ -21,12 +23,11 @@ public class GameController : MonoBehaviour {
     public static CardAvator FAKEAV = new CardAvator();
     public static bool ONCHANGE = false;
 
-
     public static Queue<NextEvent> skillEventsQueue = new Queue<NextEvent>();
+    
     public static bool eventTriggering = false;
 
     public bool animateTriggering = false;
-
 
     public Dictionary<CardAvator, List<Skill>> skillList = new Dictionary<CardAvator, List<Skill>>();
 
@@ -38,7 +39,8 @@ public class GameController : MonoBehaviour {
     private SoundController soundController;
     private float timer = 0;
     private float wickropeLength;
-    public bool isCurrentTurnHero1 = true;//当前回合英雄
+    public static bool isCurrentTurnHero1 = true;//当前回合英雄
+
     private CardGenerator cardGenerator;
 
     public static bool triggerSkillDone = true;
@@ -58,6 +60,7 @@ public class GameController : MonoBehaviour {
         wickropeSprite = this.transform.Find("wickrope").GetComponent<UISprite>();
         wickropeLength = wickropeSprite.width;
         wickropeSprite.width = 0;
+        MonoBehaviour.print(wickropeSprite.width);
         soundController = GameObject.Find("FightCard").GetComponent<SoundController>();
 
         skillEventsQueue = new Queue<NextEvent>();
@@ -84,6 +87,7 @@ public class GameController : MonoBehaviour {
         //如果第一个回合时玩家不是hero1，那么应当由hero1的AI来执行。
         if (!Client.isClientHero1)
         {
+            endButton.disable();
             StartCoroutine(EnemyAITurn(2));
         }
 
