@@ -77,7 +77,6 @@ public class DraggableAvator : UIDragDropItem
         {
             return;
         }
-        
 
         base.OnDragDropStart();
         this.GetComponent<CardAvator>().onHold += 1;

@@ -76,6 +76,10 @@ public class Card : CardBase
         package = card.package;
         cost = card.cost;
         damage = card.damage;
+        damageFly = card.damageFly;
+        damageWalk = card.damageWalk;
+        damageSail = card.damageSail;
+        damageStop = card.damageStop;
         hp = card.hp;
         maxHp = card.hp;
         attackDistance = card.attackDistance;

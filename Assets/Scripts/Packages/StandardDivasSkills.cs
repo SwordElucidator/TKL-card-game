@@ -48,6 +48,7 @@ public class DiamondCrevasseSkill : Skill
         this.name = "DiamondCrevasse";
         this.chineseName = "钻石裂痕";
         this.events.Add(TriggerEvent.OnTurnStart);
+        this.events.Add(TriggerEvent.CardIn);
         this.yieldtime = 1f;
     }
 
@@ -59,6 +60,9 @@ public class DiamondCrevasseSkill : Skill
             {
                 return true;
             }
+        }else if (e == TriggerEvent.CardIn)
+        {
+            return true;
         }
         return false;
     }
@@ -72,7 +76,17 @@ public class DiamondCrevasseSkill : Skill
             {
                 cards[i].doMotivate(0, 1);
             }
-            //舰载机，等会写
+
+            cards = thisCard.getFighters();
+            for (int i = 0; i < cards.Count; i++)
+            {
+                cards[i].doMotivate(0, 1);
+            }
+
+        }
+        else if (e == TriggerEvent.CardIn)
+        {
+            Areas.PutNear(thisCard, CardFile.makeCardFile(thisCard.package, 3, 3, 2, 2, 2, 2, 2, "VF-25", thisCard.heroName, "VF-25", TypeAge.None, TypeCharacter.None));
         }
         return false;
     }

@@ -141,3 +141,69 @@ public class TotsugekiSkill : Skill
         return false;
     }
 }
+
+//Kaga
+//
+public class AirControlSkill : Skill
+{
+    public AirControlSkill()
+    {
+        this.name = "AirControl";
+        this.chineseName = "制空";
+        this.events.Add(TriggerEvent.OnTurnStart);
+    }
+
+    public override bool canTrigger(CardAvator thisCard, object data, TriggerEvent e)
+    {
+        if (e == TriggerEvent.OnTurnStart)
+        {
+            if (thisCard.hasSkill(this) && (bool)data == thisCard.isHero1)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public override bool OnTrigger(CardAvator thisCard, object data, TriggerEvent e)
+    {
+        if (e == TriggerEvent.OnTurnStart)
+        {
+            Areas.PutNear(thisCard, CardFile.makeCardFile(thisCard.package, 1, 2, 0, 0, 0, 2, 2, "舰战", thisCard.heroName, "Fighter", TypeAge.None, TypeCharacter.None));
+        }
+
+        return false;
+    }
+}
+
+public class WifeSkill : Skill
+{
+    public WifeSkill()
+    {
+        this.name = "Wife";
+        this.chineseName = "正妻空母";
+        this.events.Add(TriggerEvent.OnTurnEnd);
+    }
+
+    public override bool canTrigger(CardAvator thisCard, object data, TriggerEvent e)
+    {
+        if (e == TriggerEvent.OnTurnEnd  && (bool)data == thisCard.isHero1)
+        {
+            if (thisCard.hasSkill(this) && thisCard.getHero().hpCount < thisCard.getHero().maxHp)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public override bool OnTrigger(CardAvator thisCard, object data, TriggerEvent e)
+    {
+        if (e == TriggerEvent.OnTurnEnd)
+        {
+            thisCard.getHero().Heal(1);
+        }
+
+        return false;
+    }
+}

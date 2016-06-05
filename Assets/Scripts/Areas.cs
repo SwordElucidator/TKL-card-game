@@ -172,7 +172,17 @@ public class Areas : MonoBehaviour {
 
     public GameObject getArea(int id)
     {
-        return areas[id];
+        if (id < 0 || id >= areas.Length)
+        {
+            return null;
+        }
+        if (Client.isClientHero1)
+        {
+            return areas[id];
+        }else
+        {
+            return areas[31 - id];
+        }
     }
 
     private string presetTag(int area_id)
@@ -189,6 +199,77 @@ public class Areas : MonoBehaviour {
         {
             return "BaseAvators";
         }
+    }
+
+    public static void PutNear(CardAvator avator, CardFile card)
+    {
+        Areas areas = avator.transform.parent.parent.GetComponent<Areas>();
+        GameObject area = avator.transform.parent.gameObject;
+        List<GameObject> ars = new List<GameObject>();
+        if (CanPut(card, areas.getAreaByDisplacement(area, 1)))
+        {
+            ars.Add(areas.getAreaByDisplacement(area, 1));
+        }
+        if (CanPut(card, areas.getAreaByDisplacement(area, -1)))
+        {
+            ars.Add(areas.getAreaByDisplacement(area, -1));
+        }
+        if (CanPut(card, areas.getAreaByDisplacement(area, 8)))
+        {
+            ars.Add(areas.getAreaByDisplacement(area, 8));
+        }
+        if (CanPut(card, areas.getAreaByDisplacement(area, -8)))
+        {
+            ars.Add(areas.getAreaByDisplacement(area, -8));
+        }
+        if (ars.Count == 0)
+        {
+            return;
+        }
+        GameObject toAr = ars[UnityEngine.Random.Range(0, ars.Count)];
+        if (toAr)
+        {
+            GameController.skillEventsQueue.Enqueue(new NextEvent(new OneCall(toAr, new NextPut(card, avator.isHero1), Calls.CallPutEvent)));
+        }
+    }
+
+    private GameObject getAreaByDisplacement(GameObject area, int dis)
+    {
+        int new_id = getID(area) + dis;
+        return getArea(new_id);
+    }
+
+    public static void Put(NextPut cardPut, GameObject area)
+    {
+
+        GameObject avator = NGUITools.AddChild(area, area.transform.parent.GetComponent<Areas>().avatorPrefeb);
+        avator.GetComponent<CardAvator>().InheritFromCardFile(cardPut.card, cardPut.isHero1);
+        //doSet会handleupdateShow的职责
+        avator.GetComponent<CardAvator>().doSet();
+        avator.GetComponent<CardAvator>().PlaySound("in");
+        //加入到技能列表中
+        GameObject.Find("GameController").GetComponent<GameController>().addSkillsFromCard(avator.GetComponent<CardAvator>());
+
+
+
+        //进去的时候call的方法
+        List<Skill> lst = GameObject.Find("GameController").GetComponent<GameController>().getSkillsOn(TriggerEvent.CardIn, avator.GetComponent<CardAvator>());
+        if (lst.Count > 0)
+        {
+            for (int i = 0; i < lst.Count; i++)
+            {
+                if (lst[i].canTrigger(avator.GetComponent<CardAvator>(), null, TriggerEvent.CardIn))
+                {
+                    GameController.skillEventsQueue.Enqueue(new NextEvent(new OneSkill(lst[i], avator.GetComponent<CardAvator>(), null, TriggerEvent.CardIn)));
+                    //lst[i].OnTrigger(avator.GetComponent<CardAvator>(), null, TriggerEvent.CardIn);
+                    //area.transform.parent.GetComponent<Areas>().StartCoroutine(lst[i].waitForResult(avator.GetComponent<CardAvator>(), null, TriggerEvent.CardIn));
+                }
+            }
+        }
+
+        //结束set的全部工作 因为之上的doSet之类的并不改变各项属性，可以直接令方法被调用了。
+        GameController.eventTriggering = false;
+
     }
 
     public static void Set(Card card, GameObject area)
@@ -226,6 +307,48 @@ public class Areas : MonoBehaviour {
         
     }
 
+
+
+    //放置不用在意敌友，可以放就行
+    public static bool CanPut(CardFile card, GameObject area)
+    {
+        //TODO
+        if (!area)
+        {
+            return false;
+        }
+        //保证gameobject是个area
+        if (!area.transform.parent)
+            return false;
+        if (area.transform.parent.name != "FightCard")
+        {
+            return false;
+        }
+
+        if (area.transform.childCount > 0)
+        {
+            return false;
+        }
+        //如果类型是CharacterCard那么就要自己这边的两排
+        if (card.cardType == CardType.CharacterCard)
+        {
+            return area.tag == "CharacterAvators";
+        }
+        else if (card.cardType == CardType.BaseCard)
+        {
+            return area.tag == "BaseAvators";
+        }
+        else if (card.cardType == CardType.TacticCard)
+        {
+            return area.tag == "TacticAvators";
+        }
+        else if (card.cardType == CardType.Fighter)
+        {
+            return true;
+        }
+        return false;
+    }
+
     public static bool CanSet(Card card, GameObject area)
     {
         //TODO
@@ -256,8 +379,11 @@ public class Areas : MonoBehaviour {
         else if (card.cardType == CardType.TacticCard)
         {
             return area.tag == "TacticAvators";
+        }else if (card.cardType == CardType.Fighter)
+        {
+            return true;
         }
-        return false;
+            return false;
     }
 
     public static void Move(CardAvator card, GameObject area)
@@ -895,6 +1021,28 @@ public class Areas : MonoBehaviour {
             {
                 if (all || areas[i].transform.GetChild(0).GetComponent<CardAvator>().cardType == CardType.CharacterCard)
                     outs.Add(areas[i].transform.GetChild(0).GetComponent<CardAvator>());
+            }
+
+        }
+        return outs;
+    }
+
+    public List<CardAvator> getFighters(bool both = false, bool isHero1 = true)
+    {
+        List<CardAvator> outs = new List<CardAvator>();
+        for (int i = 0; i < areas.Length; i++)
+        {
+            if (areas[i].transform.childCount > 0)
+            {
+                if (areas[i].transform.GetChild(0).GetComponent<CardAvator>().cardType == CardType.Fighter)
+                {
+                    if (both || isHero1 == areas[i].transform.GetChild(0).GetComponent<CardAvator>().isHero1)
+                    {
+                        outs.Add(areas[i].transform.GetChild(0).GetComponent<CardAvator>());
+                    }
+                    
+                }
+                   
             }
 
         }

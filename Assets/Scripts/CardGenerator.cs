@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Networking;
 
-public class CardGenerator : MonoBehaviour {
+public class CardGenerator : MonoBehaviour
+{
 
     public GameObject cardPrefeb;
     public Transform fromCard;
@@ -39,7 +41,6 @@ public class CardGenerator : MonoBehaviour {
             }
         }
     }
-
 
 
 

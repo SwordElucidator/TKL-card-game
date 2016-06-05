@@ -21,6 +21,13 @@ public class EndButton : MonoBehaviour {
 
     }
 
+    public void disable()
+    {
+        can_click = false;
+        this.GetComponent<UIButton>().normalSprite = "enemy_button";
+        this.GetComponent<UIButton>().enabled = false;
+    }
+
     public void enemyButtonClick()
     {
         clicked = true;

@@ -183,7 +183,7 @@ public class Hero : MonoBehaviour
         Areas.IsButtonsOnUse = false;
 
         getAreas().disableSpecificButtons(avators);
-        getMyCard().changeAllCardsStatus(GameObject.Find("GameController").GetComponent<GameController>().isCurrentTurnHero1);
+        getMyCard().changeAllCardsStatus(GameController.isCurrentTurnHero1 == getMyCard().isHero1);
     }
 
 

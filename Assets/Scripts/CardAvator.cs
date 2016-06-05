@@ -34,6 +34,9 @@ public class CardAvator : CardBase
     private UISprite sprite;
     private UILabel hpLabel;
     private UILabel damageLabel;
+    private UILabel damageFlyLabel;
+    private UILabel damageSailLabel;
+    private UILabel damageWalkLabel;
     private UILabel attackDistanceLabel;
     private SoundController soundController;
     private UISprite animatorSprite;
@@ -51,6 +54,9 @@ public class CardAvator : CardBase
         draggableAvator = this.GetComponent<DraggableAvator>();
         hpLabel = transform.Find("hp_num").GetComponent<UILabel>();
         damageLabel = transform.Find("damage_num").GetComponent<UILabel>();
+        damageFlyLabel = transform.Find("damage_fly_num").GetComponent<UILabel>();
+        damageSailLabel = transform.Find("damage_sail_num").GetComponent<UILabel>();
+        damageWalkLabel = transform.Find("damage_walk_num").GetComponent<UILabel>();
         attackDistanceLabel = transform.Find("attackDistance_num").GetComponent<UILabel>();
         soundController = GameObject.Find("FightCard").GetComponent<SoundController>();
         animatorSprite = this.transform.Find("animator").GetComponent<UISprite>();
@@ -78,7 +84,16 @@ public class CardAvator : CardBase
 
     public void ResetPos()//更新血量伤害的位置
     {
-        damageLabel.GetComponent<UIAnchor>().enabled = true;
+        
+        if (cardType == CardType.Fighter)
+        {
+            damageFlyLabel.GetComponent<UIAnchor>().enabled = true;
+            damageSailLabel.GetComponent<UIAnchor>().enabled = true;
+            damageWalkLabel.GetComponent<UIAnchor>().enabled = true;
+        }else
+        {
+            damageLabel.GetComponent<UIAnchor>().enabled = true;
+        }
         hpLabel.GetComponent<UIAnchor>().enabled = true;
         attackDistanceLabel.GetComponent<UIAnchor>().enabled = true;
     }
@@ -97,7 +112,17 @@ public class CardAvator : CardBase
     public void ResetShow()
     {//更新血量伤害的显示 更新sprite显示
         
-        damageLabel.text = damage + "";
+        
+        if (cardType == CardType.Fighter)
+        {
+            damageLabel.text = "";
+            damageFlyLabel.text = damageFly + "";
+            damageSailLabel.text = damageSail + "";
+            damageWalkLabel.text = damageWalk + "";
+        }else
+        {
+            damageLabel.text = damage + "";
+        }
         hpLabel.text = hp + "";
         attackDistanceLabel.text = attackDistance + "";
         this.GetComponent<UISprite>().spriteName = spriteName + "_avator";
@@ -117,6 +142,13 @@ public class CardAvator : CardBase
         if (avatorButton.enabled)
         {
             this.GetComponent<UISprite>().color = new Color(1F, 1F, 0.7F);
+        }
+        else if (isHero1 != GameController.isCurrentTurnHero1)
+        {
+            //如果这个回合不是玩家的回合
+            this.GetComponent<UISprite>().color = new Color(0.5F, 0.5F, 0.5F);
+            draggableAvator.enabled = false;
+
         }
         else if(!canDoAttack && !canDoMove)
         {
@@ -156,6 +188,10 @@ public class CardAvator : CardBase
     {
         cost = card.cost;
         damage = card.damage;
+        damageFly = card.damageFly;
+        damageWalk = card.damageWalk;
+        damageSail = card.damageSail;
+        damageStop = card.damageStop;
         hp = card.hp;
         maxHp = card.maxHp;
         attackDistance = card.attackDistance;
@@ -189,6 +225,51 @@ public class CardAvator : CardBase
         this.GetComponent<UISprite>().spriteName = card.spriteName + "_avator";
         ResetShow();
     }
+
+    public void InheritFromCardFile(CardFile card, bool isHero1)
+    {
+        cost = card.cost;
+        damage = card.damage;
+        damageFly = card.damageFly;
+        damageWalk = card.damageWalk;
+        damageSail = card.damageSail;
+        damageStop = card.damageStop;
+        hp = card.hp;
+        maxHp = card.hp;
+        attackDistance = card.attackDistance;
+        cardName = card.cardName;
+        heroName = card.heroName;
+        spriteName = card.spriteName;
+        typeAge = card.typeAge;
+        typeCharacter = card.typeCharacter;
+        typeMove = card.typeMove;
+        cardType = card.cardType;
+        skills = card.skills;
+        hasCharge = card.hasCharge;
+        if (hasCharge)
+        {
+            canDoMove = true;
+            canDoAttack = true;
+        }
+        else
+        {
+            canDoMove = false;
+            canDoAttack = false;
+        }
+        moved = false;
+        attacked = false;
+        hasRush = card.hasRush;
+        this.isHero1 = isHero1;
+        //需要反面的条件同上，如果当前角色不拥有这张牌
+        if (Client.isClientHero1 != isHero1)
+        {
+            this.GetComponent<UISprite>().flip = UIBasicSprite.Flip.Both;
+        }
+        this.GetComponent<UISprite>().spriteName = card.spriteName + "_avator";
+        ResetShow();
+    }
+
+
 
     public void Attack(CardAvator card, bool can_counter = true)
     {
@@ -456,7 +537,26 @@ public class CardAvator : CardBase
         thisTweenPosition.PlayForward();
         thisTweenScale.PlayForward();
 
-        DamageStruct damage = new DamageStruct(this, card, this.damage);
+        int damageNum = this.damage;
+        if (this.cardType == CardType.Fighter)
+        {
+            switch (card.typeMove)
+            {
+                case TypeMove.Fly:
+                    damageNum = this.damageFly;
+                    break;
+                case TypeMove.Sail:
+                    damageNum = this.damageSail;
+                    break;
+                case TypeMove.Walk:
+                    damageNum = this.damageWalk;
+                    break;
+                case TypeMove.Stop:
+                    damageNum = this.damageStop;
+                    break;
+            }
+        }
+        DamageStruct damage = new DamageStruct(this, card, damageNum);
         DamageStruct damage2 = null;
 
 
@@ -466,7 +566,26 @@ public class CardAvator : CardBase
         bool thisDead = false;
         if (can_counter)
         {
-            damage2 = new DamageStruct(card, this, card.damage);
+            damageNum = card.damage;
+            if (card.cardType == CardType.Fighter)
+            {
+                switch (this.typeMove)
+                {
+                    case TypeMove.Fly:
+                        damageNum = card.damageFly;
+                        break;
+                    case TypeMove.Sail:
+                        damageNum = card.damageSail;
+                        break;
+                    case TypeMove.Walk:
+                        damageNum = card.damageWalk;
+                        break;
+                    case TypeMove.Stop:
+                        damageNum = card.damageStop;
+                        break;
+                }
+            }
+            damage2 = new DamageStruct(card, this, damageNum);
             thisDead = doDamage(damage2);
         }
 
@@ -584,6 +703,7 @@ public class CardAvator : CardBase
         yield return new WaitForSeconds(0.75f);
         thisTweenPosition.ResetToBeginning();
         thisTweenScale.ResetToBeginning();
+        this.ResetPos();
         //结束后归位
         onHold -= 1;
         //this.transform.parent.parent.GetComponent<Areas>().UpdateShow();
@@ -655,7 +775,16 @@ public class CardAvator : CardBase
 
     public void addDamage(int num)
     {
-        damage += num;
+       
+        if (this.cardType == CardType.Fighter)
+        {
+            damageFly += 1;
+            damageSail += 1;
+            damageWalk += 1;
+        }else
+        {
+            damage += num;
+        }
         ResetShow();
     }
 
@@ -695,6 +824,11 @@ public class CardAvator : CardBase
     public List<CardAvator> getSelfCards(bool all = false)
     {
         return this.transform.parent.parent.GetComponent<Areas>().getAllActiveAvators(this.isHero1, all);
+    }
+
+    public List<CardAvator> getFighters(bool both = false)
+    {
+        return this.transform.parent.parent.GetComponent<Areas>().getFighters(both, this.isHero1);
     }
 
     public CardAvator getRandomSelfCard(bool all = false)

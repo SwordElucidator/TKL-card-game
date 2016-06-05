@@ -15,6 +15,7 @@ public class StartMenu : MonoBehaviour {
     public TweenPosition logoTweenPosition;
 
     public TweenPosition selectRoleTween;
+    public TweenPosition multiplePlayersTween;
     public TweenPosition settingsTween;
 
     public TweenPosition heroZeroTween;
@@ -109,6 +110,12 @@ public class StartMenu : MonoBehaviour {
         showHeroSelect();
     }
 
+    public void onMultiplePlayerButtonClicked()
+    {
+        clearMainButtons();
+        showMultiplePlayersScene();
+    }
+
     public void onSettingButtonClicked()
     {
         clearMainButtons();
@@ -142,6 +149,12 @@ public class StartMenu : MonoBehaviour {
         heroZeroTween.PlayForward();
     }
 
+    private void showMultiplePlayersScene()
+    {
+        //show select row page
+        multiplePlayersTween.PlayForward();
+    }
+
     private void showSettings()
     {
         //show select row page
@@ -152,6 +165,12 @@ public class StartMenu : MonoBehaviour {
     {
         selectRoleTween.PlayReverse();
         heroZeroTween.PlayReverse();
+        showMainButtonsAgain();
+    }
+
+    public void OnMultiplePlayersReturnButtonClick()
+    {
+        multiplePlayersTween.PlayReverse();
         showMainButtonsAgain();
     }
 

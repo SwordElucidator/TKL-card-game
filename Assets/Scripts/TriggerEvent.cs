@@ -19,6 +19,18 @@ public class NextEvent {
     }
 }
 
+public class NextPut
+{
+    public CardFile card;
+    public bool isHero1;
+
+    public NextPut(CardFile card, bool isHero1)
+    {
+        this.card = card;
+        this.isHero1 = isHero1;
+    }
+}
+
 public delegate void CallEvent(GameObject source, object oj);
 
 public class Calls
@@ -27,6 +39,12 @@ public class Calls
     {
         //对于set而言，oj是gameObject surface
         Areas.Set(source.GetComponent<Card>(), (GameObject)oj);
+    }
+
+    public static void CallPutEvent(GameObject source, object oj)
+    {
+        //对于put而言, source是area object是CardFile card
+        Areas.Put((NextPut)oj, source);
     }
 
     public static void CallMoveEvent(GameObject source, object oj)
