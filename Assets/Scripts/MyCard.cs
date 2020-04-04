@@ -68,7 +68,7 @@ public class MyCard : MonoBehaviour {
         go.transform.parent = this.transform;
         
         
-        go.GetComponent<UISprite>().width = 130;
+        go.GetComponent<UISprite>().width = 180;
         go.GetComponent<Card>().ResetPos();
 
 
@@ -122,7 +122,7 @@ public class MyCard : MonoBehaviour {
         {
             Vector3 toPosition = card01.position + new Vector3(xOffset, 0, 0) * i;
             iTween.MoveTo(cards[i], toPosition, 0.5f);
-            cards[i].GetComponent<UISprite>().width = 130;
+            cards[i].GetComponent<UISprite>().width = 180;
             cards[i].GetComponent<Card>().ResetPos();
             cards[i].GetComponent<Card>().ResetShow();
             cards[i].GetComponent<Card>().SetDepth(startDepth + 2*i);
