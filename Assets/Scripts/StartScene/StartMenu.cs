@@ -7,9 +7,9 @@ public class StartMenu : MonoBehaviour {
     //public VideoPlayer videoPlayer;
 
     //whether movie is being drawn
-    public bool isDrawMov = true;
+    public bool isDrawMov = false;
 
-    public bool isShowMessage = false;
+    public bool isShowMessage = true;
 
     public TweenScale logoTweenScale;
     public TweenRotation logoTweenRotation;
@@ -37,35 +37,13 @@ public class StartMenu : MonoBehaviour {
         gamesettings.ChangeGlobalVolumn();
         //add onFinish to logoTweenScale
         logoTweenScale.AddOnFinished(this.OnLogoTweenFinished);
-        if (PlayerPrefs.GetInt("from_scene") == 0)
-        {
-			//movTexture.loop = false;
-			//movTexture.Play();
-            this.GetComponent<AudioSource>().Play();
-        }else
-        {
-            PlayerPrefs.SetInt("from_scene", 0);
-            StopMov();
-        }
-        
-	}
+        // 暂时没movie，直接跳过吧
+        StopMov();
+
+    }
 	
 	// Update is called once per frame
 	void Update () {
-	    if (isDrawMov)
-        {
-            if (Input.GetMouseButtonDown(0) && isShowMessage == false)
-            {
-                isShowMessage = true;
-            }else if (Input.GetMouseButtonDown(0) && isShowMessage == true)
-            {
-                StopMov();
-            }
-        }
-       //if (isDrawMov != movTexture.isPlaying)
-       // {
-       //     StopMov();
-       // }
 
        if (canShowMainButtons && Input.GetMouseButtonDown(0))
         {
