@@ -1,7 +1,7 @@
-//----------------------------------------------
+//-------------------------------------------------
 //            NGUI: Next-Gen UI kit
-// Copyright © 2011-2015 Tasharen Entertainment
-//----------------------------------------------
+// Copyright © 2011-2018 Tasharen Entertainment Inc
+//-------------------------------------------------
 
 using UnityEngine;
 using UnityEditor;
@@ -201,7 +201,7 @@ static public class NGUIMenu
 	{
 		if (UIRoot.list.Count == 0 || UICamera.list.size == 0) return true;
 		foreach (UICamera c in UICamera.list)
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
+#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
 			if (NGUITools.GetActive(c) && c.camera.isOrthoGraphic)
 #else
 			if (NGUITools.GetActive(c) && c.GetComponent<Camera>().orthographic)
@@ -220,7 +220,7 @@ static public class NGUIMenu
 	{
 		if (UIRoot.list.Count == 0 || UICamera.list.size == 0) return true;
 		foreach (UICamera c in UICamera.list)
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
+#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
 			if (NGUITools.GetActive(c) && !c.camera.isOrthoGraphic)
 #else
 			if (NGUITools.GetActive(c) && !c.GetComponent<Camera>().orthographic)
@@ -584,7 +584,7 @@ static public class NGUIMenu
 
 			BoxCollider2D bc = go.AddComponent<BoxCollider2D>();
 			bc.size = size;
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
+#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
 			bc.center = center;
 #else
 			bc.offset = center;
@@ -596,7 +596,7 @@ static public class NGUIMenu
 			
 			if (p != null)
 			{
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
+#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
 				if (p.rigidbody != null) NGUITools.Destroy(p.rigidbody);
 #else
 				if (p.GetComponent<Rigidbody>() != null) NGUITools.Destroy(p.GetComponent<Rigidbody>());
@@ -628,7 +628,7 @@ static public class NGUIMenu
 
 			cam.eventType = UICamera.EventType.UI_3D;
 
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
+#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
 			Vector3 center = c.center;
 #else
 			Vector3 center = c.offset;
@@ -653,7 +653,7 @@ static public class NGUIMenu
 				if (p.GetComponent<Rigidbody2D>() != null)
 					NGUITools.Destroy(p.GetComponent<Rigidbody2D>());
 
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
+#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
 				if (p.rigidbody == null)
 #else
 				if (p.GetComponent<Rigidbody>() == null)
@@ -711,10 +711,7 @@ static public class NGUIMenu
 
 	[MenuItem("NGUI/Normalize Depth Hierarchy &#0", false, 11)]
 	static public void Normalize () { NGUITools.NormalizeDepths(); }
-	
-	[MenuItem("NGUI/", false, 11)]
-	static void Breaker () { }
 
-	[MenuItem("NGUI/Help", false, 12)]
+	[MenuItem("NGUI/Help", false, 120)]
 	static public void Help () { NGUIHelp.Show(); }
 }

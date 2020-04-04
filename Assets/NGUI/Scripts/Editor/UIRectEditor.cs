@@ -1,7 +1,7 @@
-//----------------------------------------------
+//-------------------------------------------------
 //            NGUI: Next-Gen UI kit
-// Copyright © 2011-2015 Tasharen Entertainment
-//----------------------------------------------
+// Copyright © 2011-2018 Tasharen Entertainment Inc
+//-------------------------------------------------
 
 using UnityEngine;
 using UnityEditor;
@@ -69,7 +69,7 @@ public class UIRectEditor : Editor
 	{
 		Transform target = sp.objectReferenceValue as Transform;
 		if (target == null) return null;
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
+#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
 		return target.camera;
 #else
 		return target.GetComponent<Camera>();
@@ -537,7 +537,7 @@ public class UIRectEditor : Editor
 				anchor.Set(anchor.relative, val);
 			}
 		}
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
+#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
 		else if (anchor.target.camera != null)
 		{
 			Vector3[] sides = anchor.target.camera.GetSides(parent);
@@ -622,7 +622,7 @@ public class UIRectEditor : Editor
 				anchor.Set(anchor.relative, val);
 			}
 		}
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
+#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
 		else if (anchor.target.camera != null)
 		{
 			Vector3[] sides = anchor.target.camera.GetSides(parent);

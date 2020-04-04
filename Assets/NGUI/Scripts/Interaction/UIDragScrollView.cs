@@ -1,7 +1,7 @@
-//----------------------------------------------
+//-------------------------------------------------
 //            NGUI: Next-Gen UI kit
-// Copyright © 2011-2015 Tasharen Entertainment
-//----------------------------------------------
+// Copyright © 2011-2018 Tasharen Entertainment Inc
+//-------------------------------------------------
 
 using UnityEngine;
 using System.Collections;
@@ -77,12 +77,29 @@ public class UIDragScrollView : MonoBehaviour
 		mScroll = scrollView;
 	}
 
+	[System.NonSerialized] bool mPressed = false;
+
+	/// <summary>
+	/// Stop the active dragging operation.
+	/// </summary>
+
+	void OnDisable ()
+	{
+		if (mPressed && mScroll != null && mScroll.GetComponentInChildren<UIWrapContent>() == null)
+		{
+			mScroll.Press(false);
+			mScroll = null;
+		}
+	}
+
 	/// <summary>
 	/// Create a plane on which we will be performing the dragging.
 	/// </summary>
 
 	void OnPress (bool pressed)
 	{
+		mPressed = pressed;
+
 		// If the scroll view has been set manually, don't try to find it again
 		if (mAutoFind && mScroll != scrollView)
 		{

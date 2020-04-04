@@ -1,7 +1,7 @@
-//----------------------------------------------
+//-------------------------------------------------
 //            NGUI: Next-Gen UI kit
-// Copyright © 2011-2015 Tasharen Entertainment
-//----------------------------------------------
+// Copyright © 2011-2018 Tasharen Entertainment Inc
+//-------------------------------------------------
 
 using UnityEngine;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ using System.Collections.Generic;
 [AddComponentMenu("NGUI/UI/NGUI Widget")]
 public class UIWidget : UIRect
 {
-	public enum Pivot
+	[DoNotObfuscateNGUI] public enum Pivot
 	{
 		TopLeft,
 		Top,
@@ -34,20 +34,22 @@ public class UIWidget : UIRect
 	[HideInInspector][SerializeField] protected int mHeight = 100;
 	[HideInInspector][SerializeField] protected int mDepth = 0;
 
-	public delegate void OnDimensionsChanged ();
-	public delegate void OnPostFillCallback (UIWidget widget, int bufferOffset, BetterList<Vector3> verts, BetterList<Vector2> uvs, BetterList<Color32> cols);
+	[Tooltip("Custom material, if desired")]
+	[HideInInspector][SerializeField] protected Material mMat;
 
 	/// <summary>
 	/// Notification triggered when the widget's dimensions or position changes.
 	/// </summary>
 
 	public OnDimensionsChanged onChange;
+	public delegate void OnDimensionsChanged ();
 
 	/// <summary>
 	/// Notification triggered after the widget's buffer has been filled.
 	/// </summary>
 
 	public OnPostFillCallback onPostFill;
+	public delegate void OnPostFillCallback (UIWidget widget, int bufferOffset, List<Vector3> verts, List<Vector2> uvs, List<Color> cols);
 
 	/// <summary>
 	/// Callback triggered when the widget is about to be renderered (OnWillRenderObject).
@@ -98,7 +100,7 @@ public class UIWidget : UIRect
 
 	public bool hideIfOffScreen = false;
 
-	public enum AspectRatioSource
+	[DoNotObfuscateNGUI] public enum AspectRatioSource
 	{
 		Free,
 		BasedOnWidth,
@@ -301,6 +303,21 @@ public class UIWidget : UIRect
 				mColor = value;
 				Invalidate(alphaChange);
 			}
+		}
+	}
+
+	/// <summary>
+	/// Change the color without affecting the alpha.
+	/// </summary>
+
+	public void SetColorNoAlpha (Color c)
+	{
+		if (mColor.r != c.r || mColor.g != c.g || mColor.b != c.b)
+		{
+			mColor.r = c.r;
+			mColor.g = c.g;
+			mColor.b = c.b;
+			Invalidate(false);
 		}
 	}
 
@@ -557,18 +574,23 @@ public class UIWidget : UIRect
 	}
 
 	/// <summary>
-	/// Material used by the widget.
+	/// Custom material associated with the widget, if any.
 	/// </summary>
 
 	public virtual Material material
 	{
 		get
 		{
-			return null;
+			return mMat;
 		}
 		set
 		{
-			throw new System.NotImplementedException(GetType() + " has no material setter");
+			if (mMat != value)
+			{
+				RemoveFromPanel();
+				mMat = value;
+				MarkAsChanged();
+			}
 		}
 	}
 
@@ -621,7 +643,7 @@ public class UIWidget : UIRect
 	{
 		get
 		{
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
+#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
 			BoxCollider box = collider as BoxCollider;
 #else
 			BoxCollider box = GetComponent<Collider>() as BoxCollider;
@@ -751,7 +773,7 @@ public class UIWidget : UIRect
 	}
 
 	/// <summary>
-	/// Set the widget's rectangle.
+	/// Set the widget's rectangle. XY is the bottom-left corner.
 	/// </summary>
 
 	public override void SetRect (float x, float y, float width, float height)
@@ -797,7 +819,12 @@ public class UIWidget : UIRect
 	/// Adjust the widget's collider size to match the widget's dimensions.
 	/// </summary>
 
-	public void ResizeCollider () { if (NGUITools.GetActive(this)) NGUITools.UpdateWidgetCollider(gameObject); }
+	public void ResizeCollider ()
+	{
+		var bc = GetComponent<BoxCollider>();
+		if (bc != null) NGUITools.UpdateWidgetCollider(this, bc);
+		else NGUITools.UpdateWidgetCollider(this, GetComponent<BoxCollider2D>());
+	}
 
 	/// <summary>
 	/// Static widget comparison function used for depth sorting.
@@ -908,14 +935,6 @@ public class UIWidget : UIRect
 		if (NGUITools.GetActive(this))
 		{
 			base.OnValidate();
-
-			// Prior to NGUI 2.7.0 width and height was specified as transform's local scale
-			if ((mWidth == 100 || mWidth == minWidth) &&
-				(mHeight == 100 || mHeight == minHeight) && cachedTransform.localScale.magnitude > 8f)
-			{
-				UpgradeFrom265();
-				cachedTransform.localScale = Vector3.one;
-			}
 
 			if (mWidth < minWidth) mWidth = minWidth;
 			if (mHeight < minHeight) mHeight = minHeight;
@@ -1057,16 +1076,6 @@ public class UIWidget : UIRect
 		base.OnInit();
 		RemoveFromPanel();
 		mMoved = true;
-
-		// Prior to NGUI 2.7.0 width and height was specified as transform's local scale
-		if (mWidth == 100 && mHeight == 100 && cachedTransform.localScale.magnitude > 8f)
-		{
-			UpgradeFrom265();
-			cachedTransform.localScale = Vector3.one;
-#if UNITY_EDITOR
-			NGUITools.SetDirty(this);
-#endif
-		}
 		Update();
 	}
 
@@ -1351,7 +1360,7 @@ public class UIWidget : UIRect
 
 			// Draw the gizmo
 			Gizmos.matrix = cachedTransform.localToWorldMatrix;
-			Gizmos.color = (UnityEditor.Selection.activeGameObject == cachedTransform) ? Color.white : outline;
+			Gizmos.color = (UnityEditor.Selection.activeGameObject == gameObject) ? Color.white : outline;
 			Gizmos.DrawWireCube(center, size);
 
 			// Make the widget selectable
@@ -1512,9 +1521,9 @@ public class UIWidget : UIRect
 	/// Append the local geometry buffers to the specified ones.
 	/// </summary>
 
-	public void WriteToBuffers (BetterList<Vector3> v, BetterList<Vector2> u, BetterList<Color32> c, BetterList<Vector3> n, BetterList<Vector4> t)
+	public void WriteToBuffers (List<Vector3> v, List<Vector2> u, List<Color> c, List<Vector3> n, List<Vector4> t, List<Vector4> u2)
 	{
-		geometry.WriteToBuffers(v, u, c, n, t);
+		geometry.WriteToBuffers(v, u, c, n, t, u2);
 	}
 
 	/// <summary>
@@ -1555,7 +1564,7 @@ public class UIWidget : UIRect
 	/// Virtual function called by the UIPanel that fills the buffers.
 	/// </summary>
 
-	virtual public void OnFill(BetterList<Vector3> verts, BetterList<Vector2> uvs, BetterList<Color32> cols)
+	virtual public void OnFill (List<Vector3> verts, List<Vector2> uvs, List<Color> cols)
 	{
 		// Call this in your derived classes:
 		//if (onPostFill != null)

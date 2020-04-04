@@ -7,9 +7,9 @@ using System.Collections.Generic;
 /// It ensures that it's possible to add multiple items with the same name.
 /// </summary>
 
-public static class NGUIContextMenu
+static public class NGUIContextMenu
 {
-	[MenuItem("Help/NGUI Documentation (v.3.9.4)")]
+	[MenuItem("Help/NGUI Documentation (v.3.11.0)")]
 	static void ShowHelp0 (MenuCommand command) { NGUIHelp.Show(); }
 
 	[MenuItem("Help/NGUI Support Forum")]
@@ -327,7 +327,7 @@ public static class NGUIContextMenu
 					NGUIContextMenu.AddSeparator("Attach/");
 				}
 			}
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
+#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
 			else if (target.collider == null && target.GetComponent<Collider2D>() == null)
 #else
 			else if (target.GetComponent<Collider>() == null && target.GetComponent<Collider2D>() == null)
@@ -349,7 +349,7 @@ public static class NGUIContextMenu
 				}
 			}
 
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
+#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
 			if (target.collider != null || target.GetComponent<Collider2D>() != null)
 #else
 			if (target.GetComponent<Collider>() != null || target.GetComponent<Collider2D>() != null)

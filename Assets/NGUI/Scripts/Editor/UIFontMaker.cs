@@ -1,7 +1,7 @@
-//----------------------------------------------
+//-------------------------------------------------
 //            NGUI: Next-Gen UI kit
-// Copyright © 2011-2015 Tasharen Entertainment
-//----------------------------------------------
+// Copyright © 2011-2018 Tasharen Entertainment Inc
+//-------------------------------------------------
 
 using UnityEngine;
 using UnityEditor;
@@ -15,14 +15,14 @@ using System.IO;
 
 public class UIFontMaker : EditorWindow
 {
-	public enum FontType
+	[DoNotObfuscateNGUI] public enum FontType
 	{
 		GeneratedBitmap,	// Bitmap font, created from a dynamic font using FreeType
 		ImportedBitmap,		// Imported bitmap font, created using BMFont or another external tool
 		Dynamic,			// Dynamic font, used as-is
 	}
 
-	public enum Create
+	[DoNotObfuscateNGUI] public enum Create
 	{
 		None,
 		Bitmap,		// Bitmap font, created from a dynamic font using FreeType
@@ -30,7 +30,7 @@ public class UIFontMaker : EditorWindow
 		Dynamic,	// Dynamic font, used as-is
 	}
 
-	public enum CharacterMap
+	[DoNotObfuscateNGUI] public enum CharacterMap
 	{
 		Numeric,	// 0 through 9
 		Ascii,		// Character IDs 32 through 127
@@ -188,12 +188,8 @@ public class UIFontMaker : EditorWindow
 			{
 				if (!FreeType.isPresent)
 				{
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
 					string filename = (Application.platform == RuntimePlatform.WindowsEditor) ? "FreeType.dll" : "FreeType.dylib";
-#else
-					string filename = (Application.platform == RuntimePlatform.WindowsEditor) ? "FreeType64.dll" : "FreeType64.dylib";
-#endif
-					EditorGUILayout.HelpBox("Assets/NGUI/Editor/" + filename + " is missing", MessageType.Error);
+					EditorGUILayout.HelpBox(filename + " is missing", MessageType.Error);
 
 					GUILayout.BeginHorizontal();
 					GUILayout.Space(20f);

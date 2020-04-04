@@ -40,6 +40,7 @@ Shader "Transparent/Refractive"
 			#pragma exclude_renderers gles
 			#pragma vertex vert
 			#pragma surface surf PPL alpha
+			#pragma target 3.0
 			#include "UnityCG.cginc"
 
 			sampler2D _GrabTexture;
@@ -64,7 +65,7 @@ Shader "Transparent/Refractive"
 			void vert (inout appdata_full v, out Input o)
 			{
 				UNITY_INITIALIZE_OUTPUT(Input, o);
-				o.position = mul(UNITY_MATRIX_MVP, v.vertex);
+				o.position = UnityObjectToClipPos(v.vertex);
 				
 				#if UNITY_UV_STARTS_AT_TOP
 					float scale = -1.0;

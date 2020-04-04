@@ -1,7 +1,7 @@
-//----------------------------------------------
+//-------------------------------------------------
 //            NGUI: Next-Gen UI kit
-// Copyright © 2011-2015 Tasharen Entertainment
-//----------------------------------------------
+// Copyright © 2011-2018 Tasharen Entertainment Inc
+//-------------------------------------------------
 
 using UnityEngine;
 
@@ -22,7 +22,7 @@ public class TweenOrthoSize : UITweener
 	/// Camera that's being tweened.
 	/// </summary>
 
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
+#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
 	public Camera cachedCamera { get { if (mCam == null) mCam = camera; return mCam; } }
 #else
 	public Camera cachedCamera { get { if (mCam == null) mCam = GetComponent<Camera>(); return mCam; } }

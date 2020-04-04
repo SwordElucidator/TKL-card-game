@@ -1,7 +1,7 @@
-//----------------------------------------------
+//-------------------------------------------------
 //            NGUI: Next-Gen UI kit
-// Copyright © 2011-2015 Tasharen Entertainment
-//----------------------------------------------
+// Copyright © 2011-2018 Tasharen Entertainment Inc
+//-------------------------------------------------
 
 using UnityEngine;
 
@@ -119,10 +119,11 @@ public abstract class UIRect : MonoBehaviour
 			if (target != null)
 			{
 				if (rect != null) return rect.GetSides(relativeTo);
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
+#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
 				if (target.camera != null) return target.camera.GetSides(relativeTo);
 #else
-				if (target.GetComponent<Camera>() != null) return target.GetComponent<Camera>().GetSides(relativeTo);
+				var cam = target.GetComponent<Camera>();
+				if (cam != null) return cam.GetSides(relativeTo);
 #endif
 			}
 			return null;
@@ -153,7 +154,7 @@ public abstract class UIRect : MonoBehaviour
 
 	public AnchorPoint topAnchor = new AnchorPoint(1f);
 
-	public enum AnchorUpdate
+	[DoNotObfuscateNGUI] public enum AnchorUpdate
 	{
 		OnEnable,
 		OnUpdate,
@@ -204,7 +205,7 @@ public abstract class UIRect : MonoBehaviour
 	/// Camera used by anchors.
 	/// </summary>
 
-	public Camera anchorCamera { get { if (!mAnchorsCached) ResetAnchors(); return mCam; } }
+	public Camera anchorCamera { get { if (!mCam || !mAnchorsCached) ResetAnchors(); return mCam; } }
 
 	/// <summary>
 	/// Whether the rectangle is currently anchored fully on all sides.
@@ -312,7 +313,7 @@ public abstract class UIRect : MonoBehaviour
 		{
 			if (anchorCamera == null) return 0f;
 
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
+#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
 			if (!mCam.isOrthoGraphic)
 #else
 			if (!mCam.orthographic)
@@ -371,6 +372,7 @@ public abstract class UIRect : MonoBehaviour
 
 	protected Vector3 GetLocalPos (AnchorPoint ac, Transform trans)
 	{
+		if (ac.targetCam == null) FindCameraFor(ac);
 		if (anchorCamera == null || ac.targetCam == null)
 			return cachedTransform.localPosition;
 
@@ -466,7 +468,12 @@ public abstract class UIRect : MonoBehaviour
 
 	public void Update ()
 	{
-		if (!mAnchorsCached) ResetAnchors();
+		if (!mCam)
+		{
+			ResetAndUpdateAnchors();
+			mUpdateFrame = -1;
+		}
+		else if (!mAnchorsCached) ResetAnchors();
 
 		int frame = Time.frameCount;
 
@@ -481,7 +488,7 @@ public abstract class UIRect : MonoBehaviour
 #else
 			if (updateAnchors == AnchorUpdate.OnUpdate || mUpdateAnchors)
 #endif
-				UpdateAnchorsInternal(frame);
+			UpdateAnchorsInternal(frame);
 
 			// Continue with the update
 			OnUpdate();
@@ -613,6 +620,105 @@ public abstract class UIRect : MonoBehaviour
 	}
 
 	/// <summary>
+	/// Anchor this rectangle to the specified transform.
+	/// </summary>
+
+	public void SetAnchor (GameObject go, float left, float bottom, float right, float top)
+	{
+		Transform t = (go != null) ? go.transform : null;
+
+		leftAnchor.target = t;
+		rightAnchor.target = t;
+		topAnchor.target = t;
+		bottomAnchor.target = t;
+
+		leftAnchor.relative = left;
+		rightAnchor.relative = right;
+		bottomAnchor.relative = bottom;
+		topAnchor.relative = top;
+
+		leftAnchor.absolute = 0;
+		rightAnchor.absolute = 0;
+		bottomAnchor.absolute = 0;
+		topAnchor.absolute = 0;
+
+		ResetAnchors();
+		UpdateAnchors();
+	}
+
+	/// <summary>
+	/// Anchor this rectangle to the specified transform.
+	/// </summary>
+
+	public void SetAnchor (GameObject go,
+		float left, int leftOffset,
+		float bottom, int bottomOffset,
+		float right, int rightOffset,
+		float top, int topOffset)
+	{
+		Transform t = (go != null) ? go.transform : null;
+
+		leftAnchor.target = t;
+		rightAnchor.target = t;
+		topAnchor.target = t;
+		bottomAnchor.target = t;
+
+		leftAnchor.relative = left;
+		rightAnchor.relative = right;
+		bottomAnchor.relative = bottom;
+		topAnchor.relative = top;
+
+		leftAnchor.absolute = leftOffset;
+		rightAnchor.absolute = rightOffset;
+		bottomAnchor.absolute = bottomOffset;
+		topAnchor.absolute = topOffset;
+
+		ResetAnchors();
+		UpdateAnchors();
+	}
+
+	/// <summary>
+	/// Anchor this rectangle to the specified transform.
+	/// </summary>
+
+	public void SetAnchor (
+		float left, int leftOffset,
+		float bottom, int bottomOffset,
+		float right, int rightOffset,
+		float top, int topOffset)
+	{
+		Transform t = cachedTransform.parent;
+
+		leftAnchor.target = t;
+		rightAnchor.target = t;
+		topAnchor.target = t;
+		bottomAnchor.target = t;
+
+		leftAnchor.relative = left;
+		rightAnchor.relative = right;
+		bottomAnchor.relative = bottom;
+		topAnchor.relative = top;
+
+		leftAnchor.absolute = leftOffset;
+		rightAnchor.absolute = rightOffset;
+		bottomAnchor.absolute = bottomOffset;
+		topAnchor.absolute = topOffset;
+
+		ResetAnchors();
+		UpdateAnchors();
+	}
+
+	/// <summary>
+	/// Set the rect of the widget to the specified X, Y, width and height, anchored to the top-left corner of the screen.
+	/// Convenience function for those familiar with GUI.Draw.
+	/// </summary>
+
+	public void SetScreenRect (int left, int top, int width, int height)
+	{
+		SetAnchor(0f, left, 1f, -top - height, 0f, left + width, 1f, -top);
+	}
+
+	/// <summary>
 	/// Ensure that all rect references are set correctly on the anchors.
 	/// </summary>
 
@@ -642,7 +748,7 @@ public abstract class UIRect : MonoBehaviour
 	public void ResetAndUpdateAnchors () { ResetAnchors(); UpdateAnchors(); }
 
 	/// <summary>
-	/// Set the rectangle manually.
+	/// Set the rectangle manually. XY is the bottom-left corner.
 	/// </summary>
 
 	public abstract void SetRect (float x, float y, float width, float height);

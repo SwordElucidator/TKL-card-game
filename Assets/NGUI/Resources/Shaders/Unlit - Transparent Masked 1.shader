@@ -15,6 +15,7 @@ Shader "Hidden/Unlit/Transparent Masked 1"
 			"Queue" = "Transparent"
 			"IgnoreProjector" = "True"
 			"RenderType" = "Transparent"
+			"DisableBatching" = "True"
 		}
 		
 		Pass
@@ -24,7 +25,7 @@ Shader "Hidden/Unlit/Transparent Masked 1"
 			ZWrite Off
 			Offset -1, -1
 			Fog { Mode Off }
-			ColorMask RGB
+			//ColorMask RGB
 			Blend SrcAlpha OneMinusSrcAlpha
 
 			CGPROGRAM
@@ -48,7 +49,7 @@ Shader "Hidden/Unlit/Transparent Masked 1"
 
 			struct v2f
 			{
-				float4 vertex : POSITION;
+				float4 vertex : SV_POSITION;
 				float2 texcoord : TEXCOORD0;
 				float2 texcoord1 : TEXCOORD1;
 				float2 worldPos : TEXCOORD2;
@@ -59,7 +60,7 @@ Shader "Hidden/Unlit/Transparent Masked 1"
 
 			v2f vert (appdata_t v)
 			{
-				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+				o.vertex = UnityObjectToClipPos(v.vertex);
 				o.color = v.color;
 				o.texcoord = v.texcoord;
 				o.texcoord1 = v.texcoord1;
@@ -67,7 +68,7 @@ Shader "Hidden/Unlit/Transparent Masked 1"
 				return o;
 			}
 
-			half4 frag (v2f IN) : COLOR
+			half4 frag (v2f IN) : SV_Target
 			{
 				// Softness factor
 				float2 factor = (float2(1.0, 1.0) - abs(IN.worldPos)) * _ClipArgs0;
@@ -91,6 +92,7 @@ Shader "Hidden/Unlit/Transparent Masked 1"
 			"Queue" = "Transparent"
 			"IgnoreProjector" = "True"
 			"RenderType" = "Transparent"
+			"DisableBatching" = "True"
 		}
 		
 		Pass
@@ -99,7 +101,7 @@ Shader "Hidden/Unlit/Transparent Masked 1"
 			Lighting Off
 			ZWrite Off
 			Fog { Mode Off }
-			ColorMask RGB
+			//ColorMask RGB
 			Blend SrcAlpha OneMinusSrcAlpha
 			ColorMaterial AmbientAndDiffuse
 			

@@ -1,7 +1,7 @@
-//----------------------------------------------
+//-------------------------------------------------
 //            NGUI: Next-Gen UI kit
-// Copyright © 2011-2015 Tasharen Entertainment
-//----------------------------------------------
+// Copyright © 2011-2018 Tasharen Entertainment Inc
+//-------------------------------------------------
 
 #if !UNITY_EDITOR && (UNITY_IPHONE || UNITY_ANDROID || UNITY_WP8 || UNITY_WP_8_1 || UNITY_BLACKBERRY || UNITY_WINRT || UNITY_METRO)
 #define MOBILE
@@ -18,14 +18,14 @@ using System.Text;
 [AddComponentMenu("NGUI/UI/Input Field")]
 public class UIInput : MonoBehaviour
 {
-	public enum InputType
+	[DoNotObfuscateNGUI] public enum InputType
 	{
 		Standard,
 		AutoCorrect,
 		Password,
 	}
 
-	public enum Validation
+	[DoNotObfuscateNGUI] public enum Validation
 	{
 		None,
 		Integer,
@@ -37,7 +37,7 @@ public class UIInput : MonoBehaviour
 	}
 
 #if UNITY_EDITOR
-	public enum KeyboardType
+	[DoNotObfuscateNGUI] public enum KeyboardType
 	{
 		Default = (int)TouchScreenKeyboardType.Default,
 		ASCIICapable = (int)TouchScreenKeyboardType.ASCIICapable,
@@ -49,7 +49,7 @@ public class UIInput : MonoBehaviour
 		EmailAddress = (int)TouchScreenKeyboardType.EmailAddress,
 	}
 #else
-	public enum KeyboardType
+	[DoNotObfuscateNGUI] public enum KeyboardType
 	{
 		Default = 0,
 		ASCIICapable = 1,
@@ -62,7 +62,7 @@ public class UIInput : MonoBehaviour
 	}
 #endif
 
-	public enum OnReturnKey
+	[DoNotObfuscateNGUI] public enum OnReturnKey
 	{
 		Default,
 		Submit,
@@ -119,6 +119,12 @@ public class UIInput : MonoBehaviour
 
 	[System.NonSerialized]
 	public bool selectAllTextOnFocus = true;
+
+	/// <summary>
+	/// Whether the input text will be submitted when the input field gets unselected. By default this is off, and submit event will only be called when Enter is used.
+	/// </summary>
+
+	public bool submitOnUnselect = false;
 
 	/// <summary>
 	/// What kind of validation to use with the input field's data.
@@ -211,6 +217,7 @@ public class UIInput : MonoBehaviour
 	[System.NonSerialized] protected string mCached = "";
 	[System.NonSerialized] protected int mSelectMe = -1;
 	[System.NonSerialized] protected int mSelectTime = -1;
+	[System.NonSerialized] protected bool mStarted = false;
 
 	/// <summary>
 	/// Default text used by the input's label.
@@ -278,54 +285,61 @@ public class UIInput : MonoBehaviour
 			if (mDoInit) Init();
 			return mValue;
 		}
-		set
-		{
+		set { Set(value); }
+	}
+
+	/// <summary>
+	/// Set the input field's value. If setting the initial value, call Start() first.
+	/// </summary>
+
+	public void Set (string value, bool notify = true)
+	{
 #if UNITY_EDITOR
-			if (!Application.isPlaying) return;
+		if (!Application.isPlaying) return;
 #endif
-			if (mDoInit) Init();
-			mDrawStart = 0;
+		if (mDoInit) Init();
+		if (value == this.value) return;
+		mDrawStart = 0;
 
-			// BB10's implementation has a bug in Unity
- #if UNITY_4_3
-			if (Application.platform == RuntimePlatform.BB10Player)
- #else
-			if (Application.platform == RuntimePlatform.BlackBerryPlayer)
- #endif
-				value = value.Replace("\\b", "\b");
-
-			// Validate all input
-			value = Validate(value);
+		// BB10's implementation has a bug in Unity
+#if UNITY_4_3
+		if (Application.platform == RuntimePlatform.BB10Player)
+			value = value.Replace("\\b", "\b");
+#elif UNITY_4_7 || UNITY_5_0 || UNITY_5_1 || UNITY_5_2 || UNITY_5_3
+		if (Application.platform == RuntimePlatform.BlackBerryPlayer)
+			value = value.Replace("\\b", "\b");
+#endif
+		// Validate all input
+		value = Validate(value);
 #if MOBILE
-			if (isSelected && mKeyboard != null && mCached != value)
-			{
-				mKeyboard.text = value;
-				mCached = value;
-			}
+		if (isSelected && mKeyboard != null && mCached != value)
+		{
+			mKeyboard.text = value;
+			mCached = value;
+		}
 #endif
-			if (mValue != value)
+		if (mValue != value)
+		{
+			mValue = value;
+			mLoadSavedValue = false;
+
+			if (isSelected)
 			{
-				mValue = value;
-				mLoadSavedValue = false;
-
-				if (isSelected)
+				if (string.IsNullOrEmpty(value))
 				{
-					if (string.IsNullOrEmpty(value))
-					{
-						mSelectionStart = 0;
-						mSelectionEnd = 0;
-					}
-					else
-					{
-						mSelectionStart = value.Length;
-						mSelectionEnd = mSelectionStart;
-					}
+					mSelectionStart = 0;
+					mSelectionEnd = 0;
 				}
-				else SaveToPlayerPrefs(value);
-
-				UpdateLabel();
-				ExecuteOnChange();
+				else
+				{
+					mSelectionStart = value.Length;
+					mSelectionEnd = mSelectionStart;
+				}
 			}
+			else if (mStarted) SaveToPlayerPrefs(value);
+
+			UpdateLabel();
+			if (notify) ExecuteOnChange();
 		}
 	}
 
@@ -460,8 +474,9 @@ public class UIInput : MonoBehaviour
 	/// Automatically set the value by loading it from player prefs if possible.
 	/// </summary>
 
-	void Start ()
+	public void Start ()
 	{
+		if (mStarted) return;
 		if (selectOnTab != null)
 		{
 			UIKeyNavigation nav = GetComponent<UIKeyNavigation>();
@@ -477,6 +492,7 @@ public class UIInput : MonoBehaviour
 
 		if (mLoadSavedValue && !string.IsNullOrEmpty(savedAs)) LoadValue();
 		else value = mValue.Replace("\\n", "\n");
+		mStarted = true;
 	}
 
 	/// <summary>
@@ -490,7 +506,6 @@ public class UIInput : MonoBehaviour
 			mDoInit = false;
 			mDefaultText = label.text;
 			mDefaultColor = label.color;
-			label.supportEncoding = false;
 			mEllipsis = label.overflowEllipsis;
 
 			if (label.alignment == NGUIText.Alignment.Justified)
@@ -530,6 +545,8 @@ public class UIInput : MonoBehaviour
 	{
 		if (isSelected)
 		{
+			if (label != null) label.supportEncoding = false;
+
 #if !MOBILE
 			if (mOnGUI == null)
 				mOnGUI = gameObject.AddComponent<UIInputOnGUI>();
@@ -606,6 +623,8 @@ public class UIInput : MonoBehaviour
 
 		selection = null;
 		UpdateLabel();
+
+		if (submitOnUnselect) Submit();
 	}
 
 	/// <summary>
@@ -756,6 +775,7 @@ public class UIInput : MonoBehaviour
 					if (ch == '\uF701') continue;
 					if (ch == '\uF702') continue;
 					if (ch == '\uF703') continue;
+					if (ch == '\uF728') continue;
 
 					Insert(ch.ToString());
 				}
@@ -798,7 +818,7 @@ public class UIInput : MonoBehaviour
 				else newLine = !ctrl;
 			}
 
-			if (UICamera.GetKeyDown(mCam.submitKey0))
+			if (UICamera.GetKeyDown(mCam.submitKey0) || (mCam.submitKey0 == KeyCode.Return && UICamera.GetKeyDown(KeyCode.KeypadEnter)))
 			{
 				if (newLine)
 				{
@@ -813,7 +833,7 @@ public class UIInput : MonoBehaviour
 				}
 			}
 
-			if (UICamera.GetKeyDown(mCam.submitKey1))
+			if (UICamera.GetKeyDown(mCam.submitKey1) || (mCam.submitKey1 == KeyCode.Return && UICamera.GetKeyDown(KeyCode.KeypadEnter)))
 			{
 				if (newLine)
 				{
@@ -883,10 +903,16 @@ public class UIInput : MonoBehaviour
 
 		RuntimePlatform rp = Application.platform;
 
+#if UNITY_4_7 || UNITY_5_0 || UNITY_5_1 || UNITY_5_2 || UNITY_5_3
 		bool isMac = (
 			rp == RuntimePlatform.OSXEditor ||
 			rp == RuntimePlatform.OSXPlayer ||
 			rp == RuntimePlatform.OSXWebPlayer);
+#else
+		bool isMac = (
+			rp == RuntimePlatform.OSXEditor ||
+			rp == RuntimePlatform.OSXPlayer);
+#endif
 
 		bool ctrl = isMac ?
 			((ev.modifiers & EventModifiers.Command) != 0) :
@@ -1014,7 +1040,11 @@ public class UIInput : MonoBehaviour
 			{
 				ev.Use();
 
-				if (!string.IsNullOrEmpty(mValue))
+				if (onUpArrow != null)
+				{
+					onUpArrow();
+				}
+				else if (!string.IsNullOrEmpty(mValue))
 				{
 					mSelectionEnd = label.GetCharacterIndex(mSelectionEnd, KeyCode.UpArrow);
 					if (mSelectionEnd != 0) mSelectionEnd += mDrawStart;
@@ -1028,7 +1058,11 @@ public class UIInput : MonoBehaviour
 			{
 				ev.Use();
 
-				if (!string.IsNullOrEmpty(mValue))
+				if (onDownArrow != null)
+				{
+					onDownArrow();
+				}
+				else if (!string.IsNullOrEmpty(mValue))
 				{
 					mSelectionEnd = label.GetCharacterIndex(mSelectionEnd, KeyCode.DownArrow);
 					if (mSelectionEnd != label.processedText.Length) mSelectionEnd += mDrawStart;
@@ -1090,6 +1124,9 @@ public class UIInput : MonoBehaviour
 	}
 #endif
 
+	[System.NonSerialized] public System.Action onUpArrow;
+	[System.NonSerialized] public System.Action onDownArrow;
+
 	/// <summary>
 	/// Insert the specified text string into the current input value, respecting selection and validation.
 	/// </summary>
@@ -1149,7 +1186,7 @@ public class UIInput : MonoBehaviour
 
 	protected string GetLeftText ()
 	{
-		int min = Mathf.Min(mSelectionStart, mSelectionEnd);
+		int min = Mathf.Min(mSelectionStart, mSelectionEnd, mValue.Length);
 		return (string.IsNullOrEmpty(mValue) || min < 0) ? "" : mValue.Substring(0, min);
 	}
 

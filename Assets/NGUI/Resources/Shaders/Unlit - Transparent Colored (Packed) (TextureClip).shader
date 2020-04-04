@@ -23,7 +23,7 @@ Shader "Unlit/Transparent Colored (Packed) (TextureClip)"
 			ZWrite Off
 			Offset -1, -1
 			Fog { Mode Off }
-			ColorMask RGB
+			//ColorMask RGB
 			Blend SrcAlpha OneMinusSrcAlpha
 
 			CGPROGRAM
@@ -45,7 +45,7 @@ Shader "Unlit/Transparent Colored (Packed) (TextureClip)"
 
 			struct v2f
 			{
-				float4 vertex : POSITION;
+				float4 vertex : SV_POSITION;
 				half4 color : COLOR;
 				float2 texcoord : TEXCOORD0;
 				float2 worldPos : TEXCOORD1;
@@ -54,14 +54,14 @@ Shader "Unlit/Transparent Colored (Packed) (TextureClip)"
 			v2f vert (appdata_t v)
 			{
 				v2f o;
-				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+				o.vertex = UnityObjectToClipPos(v.vertex);
 				o.color = v.color;
 				o.texcoord = v.texcoord;
 				o.worldPos = TRANSFORM_TEX(v.vertex.xy, _MainTex);
 				return o;
 			}
 
-			half4 frag (v2f IN) : COLOR
+			half4 frag (v2f IN) : SV_Target
 			{
 				half alpha = tex2D(_ClipTex, IN.worldPos * 0.5 + float2(0.5, 0.5)).a;
 				half4 mask = tex2D(_MainTex, IN.texcoord);

@@ -1,7 +1,7 @@
-//----------------------------------------------
+//-------------------------------------------------
 //            NGUI: Next-Gen UI kit
-// Copyright © 2011-2015 Tasharen Entertainment
-//----------------------------------------------
+// Copyright © 2011-2018 Tasharen Entertainment Inc
+//-------------------------------------------------
 
 #if UNITY_EDITOR || !UNITY_FLASH
 #define REFLECTION_SUPPORT
@@ -479,7 +479,7 @@ public class EventDelegate
 			{
 				// There must be an [ExecuteInEditMode] flag on the script for us to call the function at edit time
 				System.Type type = mCachedCallback.Target.GetType();
- //#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
+ //#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
 				object[] objs = type.GetCustomAttributes(typeof(ExecuteInEditMode), true);
 // #else
 //				object[] objs = type.GetCustomAttributes(typeof(ExecuteInEditModeAttribute), true);
@@ -497,7 +497,7 @@ public class EventDelegate
 			if (mTarget != null && !Application.isPlaying)
 			{
 				System.Type type = mTarget.GetType();
-// #if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
+// #if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
 				object[] objs = type.GetCustomAttributes(typeof(ExecuteInEditMode), true);
 // #else
 //				object[] objs = type.GetCustomAttributes(typeof(ExecuteInEditModeAttribute), true);
@@ -637,8 +637,8 @@ public class EventDelegate
 					}
 					catch (System.Exception ex)
 					{
-						if (ex.InnerException != null) Debug.LogError(ex.InnerException.Message);
-						else Debug.LogError(ex.Message);
+						if (ex.InnerException != null) Debug.LogException(ex.InnerException);
+						else Debug.LogException(ex);
 					}
 #else
 					del.Execute();

@@ -1,7 +1,7 @@
-//----------------------------------------------
+//-------------------------------------------------
 //            NGUI: Next-Gen UI kit
-// Copyright © 2011-2015 Tasharen Entertainment
-//----------------------------------------------
+// Copyright © 2011-2018 Tasharen Entertainment Inc
+//-------------------------------------------------
 
 using UnityEngine;
 
@@ -13,7 +13,7 @@ using UnityEngine;
 [AddComponentMenu("NGUI/Interaction/Button Color")]
 public class UIButtonColor : UIWidgetContainer
 {
-	public enum State
+	[DoNotObfuscateNGUI] public enum State
 	{
 		Normal,
 		Hover,
@@ -124,7 +124,7 @@ public class UIButtonColor : UIWidgetContainer
 		}
 		else if (tweenTarget != null)
 		{
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
+#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
 			Renderer ren = tweenTarget.renderer;
 #else
 			Renderer ren = tweenTarget.GetComponent<Renderer>();
@@ -136,7 +136,7 @@ public class UIButtonColor : UIWidgetContainer
 			}
 			else
 			{
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6
+#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
 				Light lt = tweenTarget.light;
 #else
 				Light lt = tweenTarget.GetComponent<Light>();
@@ -186,16 +186,19 @@ public class UIButtonColor : UIWidgetContainer
 #if UNITY_EDITOR
 		if (!Application.isPlaying) return;
 #endif
-		if (mInitDone && tweenTarget != null)
+		if (mInitDone && mState != State.Normal)
 		{
 			SetState(State.Normal, true);
 
-			TweenColor tc = tweenTarget.GetComponent<TweenColor>();
-
-			if (tc != null)
+			if (tweenTarget != null)
 			{
-				tc.value = mDefaultColor;
-				tc.enabled = false;
+				TweenColor tc = tweenTarget.GetComponent<TweenColor>();
+
+				if (tc != null)
+				{
+					tc.value = mDefaultColor;
+					tc.enabled = false;
+				}
 			}
 		}
 	}
@@ -219,7 +222,7 @@ public class UIButtonColor : UIWidgetContainer
 
 	protected virtual void OnPress (bool isPressed)
 	{
-		if (isEnabled && UICamera.currentTouch != null)
+		if (isEnabled)
 		{
 			if (!mInitDone) OnInit();
 
@@ -229,7 +232,7 @@ public class UIButtonColor : UIWidgetContainer
 				{
 					SetState(State.Pressed, false);
 				}
-				else if (UICamera.currentTouch.current == gameObject)
+				else if (UICamera.currentTouch != null && UICamera.currentTouch.current == gameObject)
 				{
 					if (UICamera.currentScheme == UICamera.ControlScheme.Controller)
 					{

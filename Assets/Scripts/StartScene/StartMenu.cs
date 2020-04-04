@@ -3,7 +3,8 @@ using System.Collections;
 
 public class StartMenu : MonoBehaviour {
 
-    public MovieTexture movTexture;
+    //public MovieTexture movTexture;
+    //public VideoPlayer videoPlayer;
 
     //whether movie is being drawn
     public bool isDrawMov = true;
@@ -38,8 +39,8 @@ public class StartMenu : MonoBehaviour {
         logoTweenScale.AddOnFinished(this.OnLogoTweenFinished);
         if (PlayerPrefs.GetInt("from_scene") == 0)
         {
-            movTexture.loop = false;
-            movTexture.Play();
+			//movTexture.loop = false;
+			//movTexture.Play();
             this.GetComponent<AudioSource>().Play();
         }else
         {
@@ -61,10 +62,10 @@ public class StartMenu : MonoBehaviour {
                 StopMov();
             }
         }
-       if (isDrawMov != movTexture.isPlaying)
-        {
-            StopMov();
-        }
+       //if (isDrawMov != movTexture.isPlaying)
+       // {
+       //     StopMov();
+       // }
 
        if (canShowMainButtons && Input.GetMouseButtonDown(0))
         {
@@ -75,7 +76,7 @@ public class StartMenu : MonoBehaviour {
     void OnGUI()
     {
         if (isDrawMov) { 
-            GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), movTexture);
+            //GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), movTexture);
             if (isShowMessage)
             {
                 GUI.Label(new Rect(Screen.width / 2 - 100, Screen.height / 2, 200, 40), "再次点击屏幕退出动画的播放");
@@ -183,7 +184,7 @@ public class StartMenu : MonoBehaviour {
 
     private void StopMov()
     {
-        movTexture.Stop();
+        //movTexture.Stop();
         isDrawMov = false;
         //show main scene
         GameObject.Find("BGMScript").GetComponent<BGMLoader>().playRandom();
