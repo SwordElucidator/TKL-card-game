@@ -78,25 +78,25 @@ namespace StartScene
             }
         }
 
-        public void onStartButtonClicked()
+        public void OnStartButtonClicked()
         {
             ClearMainButtons();
             ShowHeroSelect();
         }
 
-        public void onMultiplePlayerButtonClicked()
+        public void OnMultiplePlayerButtonClicked()
         {
             ClearMainButtons();
             ShowMultiplePlayersScene();
         }
 
-        public void onSettingButtonClicked()
+        public void OnSettingButtonClicked()
         {
             ClearMainButtons();
             ShowSettings();
         }
 
-        public void onExitButtonClicked()
+        public void OnExitButtonClicked()
         {
             ClearMainButtons();
             StartCoroutine(ExitByExitButton());
@@ -163,35 +163,29 @@ namespace StartScene
         {
             BlackMask._instance.Show();
 
-            string hero1Name = hero1.spriteName;
-            int herotype1 = int.Parse(hero1Name.Substring(4, hero1Name.Length - 4));
-            int herotype2 = Random.Range(1, 4);
-            string hero2Name = "hero" + herotype2;
-
-        
+            var hero1Name = hero1.spriteName;
+            var heroType1 = int.Parse(hero1Name.Substring(4, hero1Name.Length - 4));
+            var heroType2 = Random.Range(1, 4);
+            var hero2Name = "hero" + heroType2;
 
             //set playerprefs 传输给scene play
             //应该传送的是hero的name而不是1,2,3,4
 
-        
-
-            int isClientHero1 = Random.Range(0, 2);
+            var isClientHero1 = Random.Range(0, 2);
             PlayerPrefs.SetInt("isClientHero1", isClientHero1);
             if (isClientHero1 == 1)
             {
-                PlayerPrefs.SetString("hero1", Hero.HeroNames[herotype1 - 1]);
-                PlayerPrefs.SetString("hero2", Hero.HeroNames[herotype2 - 1]);
+                PlayerPrefs.SetString("hero1", Hero.HeroNames[heroType1 - 1]);
+                PlayerPrefs.SetString("hero2", Hero.HeroNames[heroType2 - 1]);
                 VSShow._instance.Show(hero1Name, hero2Name);
             }
             else
             {
-                PlayerPrefs.SetString("hero2", Hero.HeroNames[herotype1 - 1]);
-                PlayerPrefs.SetString("hero1", Hero.HeroNames[herotype2 - 1]);
+                PlayerPrefs.SetString("hero2", Hero.HeroNames[heroType1 - 1]);
+                PlayerPrefs.SetString("hero1", Hero.HeroNames[heroType2 - 1]);
                 VSShow._instance.Show(hero2Name, hero1Name);
             }
             //设置卡组
-
-
 
             StartCoroutine(LoadPlayScene());
         }
