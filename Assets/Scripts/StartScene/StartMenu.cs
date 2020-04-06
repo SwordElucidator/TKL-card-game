@@ -30,6 +30,7 @@ namespace StartScene
 
         public UISprite hero1;
 
+        private bool started = false;
         private bool canShowMainButtons = false;
         // private bool canShowSelectRole = false; //check whether can show select role screen   UNUSED
 
@@ -40,13 +41,18 @@ namespace StartScene
             logoTweenScale.AddOnFinished(this.OnLogoTweenFinished);
             // 暂时没movie，直接跳过吧
             GameObject.Find("BGMScript").GetComponent<BGMLoader>().playRandom();
-            logoTweenScale.PlayForward();
         }
 	
         // Update is called once per frame
         private void Update () {
 
-            if (canShowMainButtons && Input.GetMouseButtonDown(0))
+            if (!started && Input.GetMouseButtonDown(0))
+            {
+                logoTweenScale.PlayForward();
+                started = true;
+            }
+
+            if (canShowMainButtons)
             {
                 ShowMainButtons();
             }
