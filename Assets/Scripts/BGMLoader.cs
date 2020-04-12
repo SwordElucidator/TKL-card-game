@@ -17,7 +17,7 @@ public class BGMLoader : MonoBehaviour {
         {
             AudioSource fx = this.fxSound;
             Destroy(gameObject);
-            GameObject.Find("BGMScript").GetComponent<BGMLoader>().fxSound = fx;
+            GameObject.Find("BGM Script").GetComponent<BGMLoader>().fxSound = fx;
         }
     }
 
@@ -26,16 +26,16 @@ public class BGMLoader : MonoBehaviour {
         fxSound.Stop();
         switch (heroName)
         {
-            case "hero1":
+            case "Hero 1":
                 fxSound.clip = TH_BGMs[3];
                 break;
-            case "hero2":
+            case "Hero 2":
                 fxSound.clip = KC_BGMs[0];
                 break;
-            case "hero3":
+            case "Hero 3":
                 fxSound.clip = DV_BGMs[1];
                 break;
-            case "hero4":
+            case "Hero 4":
                 fxSound.clip = JK_BGMs[0];
                 break;
         }

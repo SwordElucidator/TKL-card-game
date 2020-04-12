@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 namespace StartScene
@@ -7,21 +8,21 @@ namespace StartScene
 
         public TweenAlpha selectHeroAlpha;
 
-        private UISprite selectHeroSprate;
+        private UISprite selectHeroSprite;
         private UILabel selectHeroName;
 
         // Use this for initialization
 
         private void Awake()
         {
-            var heroZero = this.transform.parent.parent.Find("Hero zero");
-            selectHeroSprate = heroZero.Find("hero0").GetComponent<UISprite>();
-            selectHeroName = heroZero.Find("hero_name").GetComponent<UILabel>();
+            var heroZero = this.transform.parent.parent.Find("Hero Zero");
+            selectHeroSprite = heroZero.Find("Hero 0").GetComponent<UISprite>();
+            selectHeroName = heroZero.Find("Hero Name").GetComponent<UILabel>();
         }
 
         void OnClick()
         {
-            GameObject.Find("BGMScript").GetComponent<BGMLoader>().playOnSelectHero(this.gameObject.name);
+            GameObject.Find("BGM Script").GetComponent<BGMLoader>().playOnSelectHero(this.gameObject.name);
             StartCoroutine(ChangeAnimate());
         }
         
@@ -31,12 +32,12 @@ namespace StartScene
             selectHeroAlpha.PlayForward();
             yield return new WaitForSeconds(0.3f);
 
-            string heroName = this.gameObject.name;
+            var heroName = this.gameObject.name;
 
             //修改hero0的属性
-            selectHeroSprate.spriteName = heroName;
-            char heroIndexChar = heroName[heroName.Length - 1];
-            int heroIndex = heroIndexChar - '0';
+            var heroIndexChar = heroName[heroName.Length - 1];
+            var heroIndex = heroIndexChar - '0';
+            selectHeroSprite.spriteName = "hero" + heroIndexChar;
             selectHeroName.text = Hero.HeroChineseNames[heroIndex - 1];
             yield return new WaitForSeconds(0.5f);
             selectHeroAlpha.ResetToBeginning();

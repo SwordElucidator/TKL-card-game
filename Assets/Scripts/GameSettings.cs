@@ -72,7 +72,7 @@ public class GameSettings : MonoBehaviour {
     //用来修改当前播放的bgm声音大小
     public void ChangeLocalBgmVolumn()
     {
-        GameObject.Find("BGMScript").GetComponent<BGMLoader>().fxSound.volume = transform.Find("bgm_Slider_Container").GetComponent<UISlider>().value;
+        GameObject.Find("BGM Script").GetComponent<BGMLoader>().fxSound.volume = transform.Find("bgm_Slider_Container").GetComponent<UISlider>().value;
     }
     //用来修改试听的voice大小
     public void changeLocalVoiceVolumn()

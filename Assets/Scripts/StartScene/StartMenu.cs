@@ -40,7 +40,7 @@ namespace StartScene
             //add onFinish to logoTweenScale
             logoTweenScale.AddOnFinished(this.OnLogoTweenFinished);
             // 暂时没movie，直接跳过吧
-            GameObject.Find("BGMScript").GetComponent<BGMLoader>().playRandom();
+            GameObject.Find("BGM Script").GetComponent<BGMLoader>().playRandom();
         }
 	
         // Update is called once per frame
@@ -202,7 +202,7 @@ namespace StartScene
         {
             yield return new WaitForSeconds(3f);
             //Application.LoadLevel is obsoleted
-            GameObject.Find("BGMScript").GetComponent<BGMLoader>().stopMainPageSound();
+            GameObject.Find("BGM Script").GetComponent<BGMLoader>().stopMainPageSound();
             UnityEngine.SceneManagement.SceneManager.LoadScene(1);
         
         }
