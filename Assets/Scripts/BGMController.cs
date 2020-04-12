@@ -15,7 +15,7 @@ public class BGMController : MonoBehaviour {
         {
             MonoBehaviour.print("No BGMLoader Found, it must be from the first scene");
         }
-        loader = GameObject.Find("BGMScript").GetComponent<BGMLoader>();
+        loader = GameObject.Find("BGM Script").GetComponent<BGMLoader>();
         string heroname = "";
         if (PlayerPrefs.GetInt("isClientHero1") == 1)
         {
