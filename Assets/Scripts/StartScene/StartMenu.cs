@@ -167,7 +167,7 @@ namespace StartScene
 
         public void OnPlayButtonClick()
         {
-            BlackMask._instance.Show();
+            BlackMask.instance.Show();
 
             var hero1Name = hero1.spriteName;
             var heroType1 = int.Parse(hero1Name.Substring(4, hero1Name.Length - 4));
@@ -183,13 +183,13 @@ namespace StartScene
             {
                 PlayerPrefs.SetString("hero1", Hero.HeroNames[heroType1 - 1]);
                 PlayerPrefs.SetString("hero2", Hero.HeroNames[heroType2 - 1]);
-                VSShow._instance.Show(hero1Name, hero2Name);
+                VSShow.instance.Show(hero1Name, hero2Name);
             }
             else
             {
                 PlayerPrefs.SetString("hero2", Hero.HeroNames[heroType1 - 1]);
                 PlayerPrefs.SetString("hero1", Hero.HeroNames[heroType2 - 1]);
-                VSShow._instance.Show(hero2Name, hero1Name);
+                VSShow.instance.Show(hero2Name, hero1Name);
             }
             //设置卡组
 
