@@ -19,7 +19,7 @@ public class Hero : MonoBehaviour
         "东方project",
         "舰娘",
         "歌姬",
-        "女子高中生",
+        "JK",
         };
 
     public int maxHp = 30;
